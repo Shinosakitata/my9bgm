@@ -7,6 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { matchesSearch, type GameSearchResult } from "../lib/gameSearch";
 import { inappropriateText, similarTitle } from "../lib/textValidation";
+import { sharedSetUrl } from "../lib/site";
 import { SelectionDrop } from "./components/CatalogDrag";
 
 import {
@@ -1040,8 +1041,7 @@ export default function Home() {
         return;
       }
 
-      const url =
-        `${window.location.origin}/set/${result.share_id}`;
+      const url = sharedSetUrl(result.share_id);
 
       setPublishedUrl(url);
     } catch (error) {
@@ -1920,39 +1920,6 @@ export default function Home() {
           y + 250,
           tileSize,
           350
-        );
-
-        ctx.fillStyle =
-          "rgba(255,255,255,0.95)";
-
-        ctx.beginPath();
-
-        ctx.arc(
-          x + 58,
-          y + 58,
-          35,
-          0,
-          Math.PI * 2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle =
-          "#0f172a";
-
-        ctx.font =
-          "bold 32px sans-serif";
-
-        ctx.textAlign =
-          "center";
-
-        ctx.textBaseline =
-          "middle";
-
-        ctx.fillText(
-          String(index + 1),
-          x + 58,
-          y + 59
         );
 
         ctx.textAlign =

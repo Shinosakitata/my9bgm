@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = new URL(imageUrl);
+    const url = new URL(imageUrl.startsWith("//") ? `https:${imageUrl}` : imageUrl);
 
     // Preserve legacy RAWG images and allow IGDB covers for Canvas export.
     const allowedHosts = [

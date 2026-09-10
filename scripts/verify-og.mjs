@@ -53,7 +53,7 @@ console.log(JSON.stringify(result, null, 2));
 if (
   response.status !== 200 ||
   result.title !== "私を彩る9つのゲーム音楽 | My9GameMusic" ||
-  result.description !== "好きなゲーム音楽を9曲選んで、あなただけの一枚を作ろう。" ||
+  result.description !== null ||
   result.twitterCard !== "summary_large_image" ||
   !result.image ||
   !result.twitterImage ||

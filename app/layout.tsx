@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SITE_URL } from "../lib/site";
 
 import "./globals.css";
 
-const siteUrl = "https://my9bgm.vercel.app";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "My9GameMusic",
     template: "%s | My9GameMusic",
@@ -33,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    url: siteUrl,
+    url: SITE_URL,
     siteName: "My9GameMusic",
     title: "私を彩る9つのゲーム音楽 | My9GameMusic",
     description:

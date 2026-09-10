@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { getSharedSet, sharedSetTitle } from "../../../lib/sharedSet";
 
-const description = "好きなゲーム音楽を9曲選んで、あなただけの一枚を作ろう。";
-
 export async function generateMetadata({
   params,
 }: {
@@ -17,7 +15,7 @@ export async function generateMetadata({
 
   return {
     title: { absolute: title },
-    description,
+    description: null,
     alternates: { canonical: path },
     openGraph: {
       type: "website",
@@ -25,12 +23,10 @@ export async function generateMetadata({
       url: path,
       siteName: "My9GameMusic",
       title,
-      description,
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description,
     },
     robots: set ? { index: true, follow: true } : { index: false, follow: false },
   };
