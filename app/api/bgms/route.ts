@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+
 import { enforceRateLimit } from "../../../lib/rateLimit";
 
 type RawgGameDetail = {
@@ -7,6 +8,9 @@ type RawgGameDetail = {
   name: string;
   background_image: string | null;
 };
+
+const MAX_TITLE_LENGTH = 150;
+const MAX_COMPOSER_LENGTH = 100;
 
 function normalizeBgmTitle(value: string) {
   return value
@@ -18,6 +22,29 @@ function normalizeBgmTitle(value: string) {
       ""
     )
     .trim();
+}
+
+function containsControlCharacters(value: string) {
+  return /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(value);
+}
+
+function containsLineBreak(value: string) {
+  return /[\r\n\u2028\u2029]/.test(value);
+}
+
+function containsUrl(value: string) {
+  return /(?:https?:\/\/|www\.|(?:[a-z0-9-]+\.)+(?:com|net|org|jp|io|gg|co|xyz|info|biz|me|tv|app)(?:\/|$))/i.test(
+    value
+  );
+}
+
+function hasExcessiveRepeatedCharacters(value: string) {
+  const normalized = value.normalize("NFKC");
+  return /(.)\1{11,}/u.test(normalized);
+}
+
+function sanitizeSingleLine(value: string) {
+  return value.normalize("NFKC").replace(/\s+/g, " ").trim();
 }
 
 function getServerSupabase() {
@@ -41,6 +68,7 @@ export async function POST(request: NextRequest) {
 
   if (!supabase) {
     console.error("Supabaseのサーバー用環境変数が設定されていません。");
+
     return NextResponse.json(
       { error: "Server configuration error" },
       { status: 500 }
@@ -64,9 +92,19 @@ export async function POST(request: NextRequest) {
 
   if (!rawgApiKey) {
     console.error("RAWG_API_KEY が設定されていません。");
+
     return NextResponse.json(
       { error: "Server configuration error" },
       { status: 500 }
+    );
+  }
+
+  const contentType = request.headers.get("content-type") ?? "";
+
+  if (!contentType.toLowerCase().includes("application/json")) {
+    return NextResponse.json(
+      { error: "Content-Type は application/json を指定してください。" },
+      { status: 415 }
     );
   }
 
@@ -81,7 +119,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!body || typeof body !== "object") {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     return NextResponse.json(
       { error: "Invalid request" },
       { status: 400 }
@@ -90,14 +128,14 @@ export async function POST(request: NextRequest) {
 
   const payload = body as Record<string, unknown>;
 
-  const title =
+  const rawTitle =
     typeof payload.title === "string"
-      ? payload.title.trim()
+      ? payload.title
       : "";
 
-  const composer =
+  const rawComposer =
     typeof payload.composer === "string"
-      ? payload.composer.trim()
+      ? payload.composer
       : "";
 
   const rawgGameId =
@@ -105,24 +143,90 @@ export async function POST(request: NextRequest) {
       ? payload.rawg_game_id
       : Number(payload.rawg_game_id);
 
-  if (title.length < 1 || title.length > 150) {
+  if (!rawTitle.trim()) {
     return NextResponse.json(
-      { error: "BGM名は1〜150文字で入力してください。" },
+      { error: "BGM名を入力してください。" },
       { status: 400 }
     );
   }
 
-  if (composer.length > 150) {
+  if (containsControlCharacters(rawTitle)) {
     return NextResponse.json(
-      { error: "作曲者名は150文字以内で入力してください。" },
+      { error: "BGM名に使用できない文字が含まれています。" },
       { status: 400 }
     );
   }
 
-  if (
-    !Number.isSafeInteger(rawgGameId) ||
-    rawgGameId <= 0
-  ) {
+  if (containsLineBreak(rawTitle)) {
+    return NextResponse.json(
+      { error: "BGM名に改行は使用できません。" },
+      { status: 400 }
+    );
+  }
+
+  if (containsUrl(rawTitle)) {
+    return NextResponse.json(
+      { error: "BGM名にURLは入力できません。" },
+      { status: 400 }
+    );
+  }
+
+  if (hasExcessiveRepeatedCharacters(rawTitle)) {
+    return NextResponse.json(
+      { error: "BGM名に同じ文字を連続して入力しすぎています。" },
+      { status: 400 }
+    );
+  }
+
+  const title = sanitizeSingleLine(rawTitle);
+
+  if (title.length < 1 || title.length > MAX_TITLE_LENGTH) {
+    return NextResponse.json(
+      { error: `BGM名は1〜${MAX_TITLE_LENGTH}文字で入力してください。` },
+      { status: 400 }
+    );
+  }
+
+  if (rawComposer) {
+    if (containsControlCharacters(rawComposer)) {
+      return NextResponse.json(
+        { error: "作曲者名に使用できない文字が含まれています。" },
+        { status: 400 }
+      );
+    }
+
+    if (containsLineBreak(rawComposer)) {
+      return NextResponse.json(
+        { error: "作曲者名に改行は使用できません。" },
+        { status: 400 }
+      );
+    }
+
+    if (containsUrl(rawComposer)) {
+      return NextResponse.json(
+        { error: "作曲者名にURLは入力できません。" },
+        { status: 400 }
+      );
+    }
+
+    if (hasExcessiveRepeatedCharacters(rawComposer)) {
+      return NextResponse.json(
+        { error: "作曲者名に同じ文字を連続して入力しすぎています。" },
+        { status: 400 }
+      );
+    }
+  }
+
+  const composer = sanitizeSingleLine(rawComposer);
+
+  if (composer.length > MAX_COMPOSER_LENGTH) {
+    return NextResponse.json(
+      { error: `作曲者名は${MAX_COMPOSER_LENGTH}文字以内で入力してください。` },
+      { status: 400 }
+    );
+  }
+
+  if (!Number.isSafeInteger(rawgGameId) || rawgGameId <= 0) {
     return NextResponse.json(
       { error: "ゲームを検索結果から選択してください。" },
       { status: 400 }
@@ -138,6 +242,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (normalizedTitle.length > MAX_TITLE_LENGTH) {
+    return NextResponse.json(
+      { error: "BGM名が長すぎます。" },
+      { status: 400 }
+    );
+  }
+
   let rawgGame: RawgGameDetail;
 
   try {
@@ -145,7 +256,12 @@ export async function POST(request: NextRequest) {
       `https://api.rawg.io/api/games/${rawgGameId}?key=${encodeURIComponent(
         rawgApiKey
       )}`,
-      { cache: "no-store" }
+      {
+        cache: "no-store",
+        headers: {
+          Accept: "application/json",
+        },
+      }
     );
 
     if (!rawgResponse.ok) {
@@ -171,6 +287,7 @@ export async function POST(request: NextRequest) {
     rawgGame = data;
   } catch (error) {
     console.error("RAWGゲーム確認エラー:", error);
+
     return NextResponse.json(
       { error: "ゲーム情報の確認に失敗しました。" },
       { status: 502 }
@@ -187,6 +304,7 @@ export async function POST(request: NextRequest) {
 
   if (duplicateError) {
     console.error("重複確認エラー:", duplicateError);
+
     return NextResponse.json(
       { error: "BGMの確認に失敗しました。" },
       { status: 500 }

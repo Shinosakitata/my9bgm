@@ -98,14 +98,6 @@ export default function AboutPage() {
               </p>
             </section>
 
-            <section className="rounded-2xl border border-sky-100 bg-sky-50 p-5 sm:p-6">
-              <p className="font-bold text-sky-900">あなたなら、どの9曲を選びますか？</p>
-              <p className="mt-2 text-sm leading-6 text-sky-800">
-                思い出の曲、何度も聴いた戦闘曲、ゲームを象徴するテーマ曲。
-                ジャンルや年代を問わず、自分だけの9曲を作ってみてください。
-              </p>
-            </section>
-
             <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 pt-7 text-sm text-slate-500">
               <a href="/terms" className="hover:text-slate-900">
                 利用規約
