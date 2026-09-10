@@ -21,14 +21,25 @@ export async function GET(request: NextRequest) {
   try {
     const game = await verifyGame({ source: "igdb", id, ...(gameId == null ? {} : { gameId }) }, supabase);
     if (!game) return NextResponse.json({ error: "ゲームが見つかりません。" }, { status: 404 });
-    const rows = [];
-    for (let offset = 0; ; offset += 1000) {
-      const { data, error } = await supabase.from("bgms").select("*").eq("is_hidden", false).order("id").range(offset, offset + 999);
-      if (error) throw error;
-      rows.push(...(data ?? []).filter(row => belongsToGame(row, game)));
-      if (!data || data.length < 1000) break;
+    let identityQuery = supabase.from("bgms").select("*").eq("is_hidden", false);
+    if (game.game_id != null) {
+      const filters = [`game_id.eq.${game.game_id}`];
+      if (game.igdb_game_ids.length) filters.push(`igdb_game_id.in.(${game.igdb_game_ids.join(",")})`);
+      identityQuery = identityQuery.or(filters.join(","));
+    } else if (game.igdb_game_id != null) {
+      identityQuery = identityQuery.eq("igdb_game_id", game.igdb_game_id);
+    } else {
+      return NextResponse.json({ bgms: [] });
     }
-    return NextResponse.json({ bgms: rows });
+    // Preserve legacy rows that only carry game_title, without scanning every BGM.
+    const [identityResult, legacyTitleResult] = await Promise.all([
+      identityQuery.order("id"),
+      supabase.from("bgms").select("*").eq("is_hidden", false).eq("game_title", game.game_title).order("id"),
+    ]);
+    if (identityResult.error) throw identityResult.error;
+    if (legacyTitleResult.error) throw legacyTitleResult.error;
+    const rows = [...new Map([...(identityResult.data ?? []), ...(legacyTitleResult.data ?? [])].map(row => [row.id, row])).values()];
+    return NextResponse.json({ bgms: rows.filter(row => belongsToGame(row, game)).sort((a, b) => a.id - b.id) });
   } catch {
     return NextResponse.json({ error: "登録済みの音楽を取得できませんでした。もう一度お試しください。" }, { status: 502 });
   }

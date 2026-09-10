@@ -84,8 +84,11 @@ export async function GET(request: NextRequest) {
     const external = logicalCatalog.mappings.find(mapping => mapping.game_id === logical.id);
     if (match && external) mappedLocalGames.push({ ...match, igdb_game_id: external.external_id });
   }
+  const mappedLogicalIds = new Set(logicalCatalog.mappings.map(mapping => mapping.game_id));
   const exactLogicalIds = new Set(localGames.filter(game =>
-    game.matched_alias && normalizeSearchText(canonicalSearchQuery(game.matched_alias)) === normalizeSearchText(query)
+    mappedLogicalIds.has(game.id)
+      && game.matched_alias
+      && normalizeSearchText(canonicalSearchQuery(game.matched_alias)) === normalizeSearchText(query)
   ).map(game => game.id));
   for (const game of logicalCatalog.games) {
     if (normalizeSearchText(canonicalSearchQuery(game.name)) === normalizeSearchText(query)) {

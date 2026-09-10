@@ -47,8 +47,12 @@ const server = http.createServer(async (req, res) => {
     if (value.startsWith("in.(")) { const ids = value.slice(4, -1).split(","); rows = rows.filter(row => ids.includes(String(row[key]))); }
   }
   if (url.searchParams.has("or")) {
-    const title = url.searchParams.get("or").match(/normalized_title\.eq\.([^,)]*)/)?.[1];
-    rows = rows.filter(row => row.normalized_title == null || row.normalized_title === title);
+    const or = url.searchParams.get("or");
+    const title = or.match(/normalized_title\.eq\.([^,)]*)/)?.[1];
+    const gameId = or.match(/game_id\.eq\.([^,)]*)/)?.[1];
+    const igdbIds = or.match(/igdb_game_id\.in\.\(([^)]*)\)/)?.[1].split(",") ?? [];
+    if (title != null) rows = rows.filter(row => row.normalized_title == null || row.normalized_title === title);
+    else rows = rows.filter(row => (gameId != null && String(row.game_id) === gameId) || igdbIds.includes(String(row.igdb_game_id)));
   }
   if (req.method === "GET" && url.searchParams.has("offset")) rows = rows.slice(Number(url.searchParams.get("offset")));
   if (req.method === "GET" && url.searchParams.has("limit")) rows = rows.slice(0, Number(url.searchParams.get("limit")));

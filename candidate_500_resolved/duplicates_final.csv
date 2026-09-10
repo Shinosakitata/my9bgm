@@ -1,0 +1,10 @@
+﻿rank,bgm_title,source_game_title,decision,existing_bgm_title,confidence,reason,import_action
+2,You Will Know Our Names,Xenoblade Chronicles,duplicate_confirmed,名を冠する者たち,high,『名を冠する者たち』の英語ローカライズ名で同一曲,除外
+14,The Weight of Life,Xenoblade Chronicles 3,duplicate_confirmed,命を背負って,high,『命を背負って』の英語ローカライズ名で同一曲,除外
+24,Aoharu,Blue Archive,distinct_confirmed,RE Aoharu,high,『RE Aoharu』はAoharuのアレンジ版であり別音源,別曲として維持
+234,Proof of a Hero - Sunbreak Version,Monster Hunter Rise: Sunbreak,duplicate_confirmed,英雄の証：Sunbreak ver.,high,『英雄の証：Sunbreak ver.』の英語表記で同一バージョン,除外
+247,Song of Healing,The Legend of Zelda: Majora's Mask,duplicate_confirmed,いやしの歌,high,『いやしの歌』の英語ローカライズ名で同一曲,除外
+286,Hikari,Kingdom Hearts,distinct_confirmed,Simple and Clean,high,Simple and Cleanとは言語・歌詞・録音が異なるため別曲として維持,別曲として維持
+289,Song of the Ancients / Fate,NieR Replicant,duplicate_confirmed,イニシエノウタ／運命,high,『イニシエノウタ／運命』の英語ローカライズ名で同一曲,除外
+376,Moonstruck Blossom,Kirby: Triple Deluxe,duplicate_confirmed,狂花水月,high,『狂花水月』の英語ローカライズ名で同一曲,除外
+411,Main Theme,Super Smash Bros. Ultimate,needs_review,命の灯火,low,名称が曖昧。既存『命の灯火』のボーカル版・インスト版のどちらを指すか特定不能,保留

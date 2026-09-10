@@ -42,3 +42,4 @@ next-env.d.ts
 
 # generated seed review/output
 /seed_output/
+/candidate_500_audit/
