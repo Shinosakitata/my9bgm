@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 
 type Bgm = {
@@ -12,6 +13,7 @@ type Bgm = {
 };
 
 type BgmSet = {
+  creator_name?: string | null;
   id: number;
   share_id: string;
   title: string | null;
@@ -36,10 +38,6 @@ export default function CommunityPage() {
 
   const [search, setSearch] =
     useState("");
-
-  useEffect(() => {
-    loadCommunitySets();
-  }, []);
 
   async function loadCommunitySets() {
     setLoading(true);
@@ -136,6 +134,11 @@ export default function CommunityPage() {
     setLoading(false);
   }
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadCommunitySets();
+  }, []);
+
   function getImageUrl(
     bgm: Bgm
   ) {
@@ -206,44 +209,47 @@ export default function CommunityPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-16 max-w-[1400px] items-center justify-between px-6">
           <div className="flex items-center gap-10">
-            <a
+            <Link
               href="/"
               className="whitespace-nowrap font-bold tracking-[0.2em]"
             >
               🎧 MY 9 BGM
-            </a>
+            </Link>
 
             <nav className="hidden gap-7 text-sm font-semibold md:flex">
-              <a
+              <Link
                 href="/"
                 className="py-5 text-slate-500 hover:text-slate-900"
               >
                 Editor
-              </a>
+              </Link>
 
               <span className="border-b-2 border-sky-500 py-5">
                 みんなの9つのBGM
               </span>
 
-              <a
-                href="/"
+              <Link
+                href="/?add=1"
                 className="py-5 text-slate-500 hover:text-slate-900"
               >
                 BGMを追加
-              </a>
+              </Link>
 
-              <span className="cursor-pointer py-5 text-slate-500 hover:text-slate-900">
+              <Link
+                href="/about"
+                className="py-5 text-slate-500 hover:text-slate-900"
+              >
                 このサイトについて
-              </span>
+              </Link>
             </nav>
           </div>
 
-          <a
+          <Link
             href="/"
             className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700"
           >
             ＋ 自分の9曲を作る
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -256,11 +262,6 @@ export default function CommunityPage() {
           <h1 className="text-4xl font-bold">
             みんなの9つのBGM
           </h1>
-
-          <p className="mt-3 max-w-2xl leading-7 text-slate-500">
-            誰かの思い出に残った9曲を覗いてみよう。
-            知らなかったゲームやBGMとの出会いがあるかもしれません。
-          </p>
         </div>
 
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -313,25 +314,25 @@ export default function CommunityPage() {
               最初の9曲を公開してみましょう。
             </p>
 
-            <a
+            <Link
               href="/"
               className="mt-6 inline-block rounded-xl bg-sky-500 px-6 py-3 font-bold text-white hover:bg-sky-600"
             >
               自分の9曲を作る
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
             {filteredSets.map(
               ({ set, bgms }) => (
-                <a
+                <Link
                   key={set.id}
                   href={`/?set=${encodeURIComponent(
                     set.share_id
                   )}`}
                   className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl"
                 >
-                  <div className="grid aspect-square grid-cols-3 overflow-hidden bg-slate-100">
+                  <div className="grid aspect-square grid-cols-3 grid-rows-3 overflow-hidden bg-slate-100">
                     {bgms.map(
                       (
                         bgm,
@@ -339,7 +340,7 @@ export default function CommunityPage() {
                       ) => (
                         <div
                           key={`${set.id}-${bgm.id}-${index}`}
-                          className="relative overflow-hidden border border-white/20"
+                          className="relative min-h-0 min-w-0 overflow-hidden border border-white/20"
                         >
                           <img
                             src={getImageUrl(
@@ -348,7 +349,7 @@ export default function CommunityPage() {
                             alt={
                               bgm.title
                             }
-                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
                           />
 
                           <div className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-[11px] font-bold text-white backdrop-blur-sm">
@@ -368,8 +369,9 @@ export default function CommunityPage() {
 
                         <h2 className="mt-1 truncate text-lg font-bold">
                           {set.title ||
-                            "私を構成する9つのBGM"}
+                            "私を彩る9つのBGM"}
                         </h2>
+                        <p className="mt-2 text-sm text-slate-500">作成者：{set.creator_name || "匿名"}</p>
                       </div>
 
                       <span className="flex-none text-xl text-slate-300 transition group-hover:translate-x-1 group-hover:text-sky-500">
@@ -418,7 +420,7 @@ export default function CommunityPage() {
                       </p>
                     </div>
                   </div>
-                </a>
+                </Link>
               )
             )}
           </div>
@@ -434,7 +436,7 @@ export default function CommunityPage() {
           className="underline hover:text-slate-600"
         >
           RAWG
-        </a>
+        </a>{" / "}<a href="https://www.igdb.com/" target="_blank" rel="noreferrer" className="underline hover:text-slate-600">IGDB</a>
       </footer>
     </main>
   );

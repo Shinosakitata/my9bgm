@@ -13,20 +13,24 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(imageUrl);
 
-    // RAWGの画像だけ許可
+    // Preserve legacy RAWG images and allow IGDB covers for Canvas export.
     const allowedHosts = [
       "media.rawg.io",
       "api.rawg.io",
+      "images.igdb.com",
     ];
 
-    if (!allowedHosts.includes(url.hostname)) {
+    if (url.protocol !== "https:" || url.port || url.username || url.password || !allowedHosts.includes(url.hostname)) {
       return NextResponse.json(
         { error: "Image host is not allowed" },
         { status: 403 }
       );
     }
 
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), {
+      redirect: "error",
+      signal: AbortSignal.timeout(10000),
+    });
 
     if (!response.ok) {
       return NextResponse.json(

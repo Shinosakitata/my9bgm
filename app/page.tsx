@@ -4,6 +4,9 @@ import { FormEvent, useEffect, useState } from "react";
 import NextImage from "next/image";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { matchesSearch, type GameSearchResult } from "../lib/gameSearch";
+import { inappropriateText, similarTitle } from "../lib/textValidation";
+import { SelectionDrop } from "./components/CatalogDrag";
 
 import {
   DndContext,
@@ -11,6 +14,7 @@ import {
   PointerSensor,
   TouchSensor,
   closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -31,18 +35,15 @@ type Bgm = {
   composer: string | null;
   image_url: string | null;
   rawg_game_id: number | null;
+  igdb_game_id: number | null;
+  game_id: number | null;
   normalized_title: string | null;
   is_hidden: boolean;
 };
 
-type RawgGame = {
-  id: number;
-  name: string;
-  image: string | null;
-  released: string | null;
-};
-
 type BgmSet = {
+  creator_name?: string | null;
+  comments?: string[] | null;
   id: number;
   share_id: string;
   title: string | null;
@@ -65,9 +66,13 @@ type SortableBgmProps = {
   removeBgm: (id: number) => void;
   getImageUrl: (bgm: Bgm, size: string) => string;
   readOnly?: boolean;
+  comment?: string;
+  canEditComment?: boolean;
+  onEditComment?: () => void;
 };
 
 const STORAGE_KEY = "my9bgm-selected";
+const BGM_PAGE_SIZE = 30;
 
 const ADMIN_USER_ID =
   process.env.NEXT_PUBLIC_ADMIN_USER_ID;
@@ -90,6 +95,9 @@ function SortableBgm({
   removeBgm,
   getImageUrl,
   readOnly = false,
+  comment = "",
+  canEditComment = false,
+  onEditComment,
 }: SortableBgmProps) {
   const {
     attributes,
@@ -114,7 +122,7 @@ function SortableBgm({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex h-[74px] w-full min-w-0 items-center gap-2 rounded-2xl border bg-white px-2.5 shadow-sm sm:gap-3 sm:px-3 ${
+      className={`relative flex w-full min-w-0 gap-2 rounded-2xl border bg-white px-2.5 shadow-sm sm:gap-3 sm:px-3 ${comment ? "min-h-[88px] items-start py-3" : "h-[74px] items-center"} ${
         isDragging
           ? "border-sky-400 shadow-lg"
           : "border-slate-200"
@@ -125,14 +133,14 @@ function SortableBgm({
           type="button"
           {...attributes}
           {...listeners}
-          className="flex h-9 w-6 flex-none cursor-grab touch-none items-center justify-center text-lg text-slate-300 hover:text-slate-600 active:cursor-grabbing sm:h-10 sm:w-7 sm:text-xl"
+          className="flex h-12 w-6 flex-none cursor-grab touch-none items-center justify-center text-lg text-slate-300 hover:text-slate-600 active:cursor-grabbing sm:w-7 sm:text-xl"
           title="ドラッグして並べ替え"
         >
           ⋮⋮
         </button>
       )}
 
-      <span className="w-5 flex-none text-center text-base font-bold text-sky-500 sm:w-6 sm:text-xl">
+      <span className={`w-5 flex-none text-center text-base font-bold text-sky-500 sm:w-6 sm:text-xl ${comment ? "pt-3" : ""}`}>
         {index + 1}
       </span>
 
@@ -145,7 +153,9 @@ function SortableBgm({
         className="h-10 w-10 flex-none rounded-lg object-cover sm:h-12 sm:w-12"
       />
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 pt-0.5">
+        <div className="flex min-w-0 items-start gap-2 pr-1">
+        <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold sm:text-base">
           {bgm.title}
         </p>
@@ -153,6 +163,14 @@ function SortableBgm({
         <p className="truncate text-[11px] text-slate-500 sm:text-xs">
           {bgm.game_title}
         </p>
+        </div>
+        {canEditComment && (
+          <button type="button" onClick={onEditComment} className="flex-none pt-0.5 text-[11px] font-semibold text-slate-400 hover:text-sky-600 sm:text-xs">
+            {comment ? "コメントを編集" : "＋コメント"}
+          </button>
+        )}
+        </div>
+        {comment && <p className="mt-2 border-l-2 border-sky-200 pl-2 text-xs leading-relaxed text-slate-600 sm:text-sm">{comment}</p>}
       </div>
 
       {!readOnly && (
@@ -171,8 +189,14 @@ function SortableBgm({
 export default function Home() {
   const [bgms, setBgms] = useState<Bgm[]>([]);
   const [selected, setSelected] = useState<Bgm[]>([]);
+  const [comments, setComments] = useState<Record<number, string>>({});
+  const [commentingBgm, setCommentingBgm] = useState<Bgm | null>(null);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [commentError, setCommentError] = useState("");
   const [search, setSearch] = useState("");
+  const [visibleBgmCount, setVisibleBgmCount] = useState(BGM_PAGE_SIZE);
   const [loading, setLoading] = useState(true);
+  const [previewBgm, setPreviewBgm] = useState<Bgm | null>(null);
 
   const [storageLoaded, setStorageLoaded] =
     useState(false);
@@ -193,6 +217,9 @@ export default function Home() {
   const [publishTitle, setPublishTitle] =
     useState("");
 
+  const [creatorName, setCreatorName] =
+    useState(() => typeof window === "undefined" ? "" : localStorage.getItem("my9bgm-creator-name") ?? "");
+
   const [publishing, setPublishing] =
     useState(false);
 
@@ -211,21 +238,6 @@ export default function Home() {
 
   const [authUser, setAuthUser] =
     useState<User | null>(null);
-
-  const [showLoginModal, setShowLoginModal] =
-    useState(false);
-
-  const [loginEmail, setLoginEmail] =
-    useState("");
-
-  const [loginPassword, setLoginPassword] =
-    useState("");
-
-  const [loginLoading, setLoginLoading] =
-    useState(false);
-
-  const [loginError, setLoginError] =
-    useState("");
 
   const isAdmin =
     Boolean(authUser) &&
@@ -249,9 +261,27 @@ export default function Home() {
     })
   );
 
+  useEffect(() => {
+    if (!previewBgm) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [previewBgm]);
+
   // =========================
   // BGM追加
   // =========================
+
+  const [chosenGame, setChosenGame] = useState<GameSearchResult | null>(null);
+  const [gameBgms, setGameBgms] = useState<Bgm[]>([]);
+  const [gameListStatus, setGameListStatus] = useState("");
+  const [gameListReady, setGameListReady] = useState(false);
+  const [popularity, setPopularity] = useState<Record<number, number>>({});
+  const [confirmedTitle, setConfirmedTitle] = useState("");
+  const [gameComposing, setGameComposing] = useState(false);
+  const [editGameComposing, setEditGameComposing] = useState(false);
 
   const [showAddForm, setShowAddForm] =
     useState(false);
@@ -271,14 +301,17 @@ export default function Home() {
   const [newImageUrl, setNewImageUrl] =
     useState<string | null>(null);
 
-  const [newRawgGameId, setNewRawgGameId] =
+  const [newIgdbGameId, setNewIgdbGameId] =
+    useState<number | null>(null);
+
+  const [newGameId, setNewGameId] =
     useState<number | null>(null);
 
   const [addMessage, setAddMessage] =
     useState("");
 
   const [gameResults, setGameResults] =
-    useState<RawgGame[]>([]);
+    useState<GameSearchResult[]>([]);
 
   const [gameSearching, setGameSearching] =
     useState(false);
@@ -297,7 +330,7 @@ export default function Home() {
     useState("");
 
   const [editGameResults, setEditGameResults] =
-    useState<RawgGame[]>([]);
+    useState<GameSearchResult[]>([]);
 
   const [editGameSearching, setEditGameSearching] =
     useState(false);
@@ -306,7 +339,7 @@ export default function Home() {
     useState("");
 
   const [editSelectedGame, setEditSelectedGame] =
-    useState<RawgGame | null>(null);
+    useState<GameSearchResult | null>(null);
 
   const [savingGameInfo, setSavingGameInfo] =
     useState(false);
@@ -391,7 +424,6 @@ export default function Home() {
   useEffect(() => {
     loadBgms();
     loadAdminSession();
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
@@ -405,10 +437,16 @@ export default function Home() {
     };
   }, []);
 
+  function updateCreatorName(value: string) {
+    setCreatorName(value);
+    localStorage.setItem("my9bgm-creator-name", value);
+  }
+
   useEffect(() => {
     if (isAdmin) {
       loadAdminReports();
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAdminReports([]);
       setShowReportManager(false);
     }
@@ -425,15 +463,6 @@ export default function Home() {
         "セッション取得エラー:",
         error
       );
-      return;
-    }
-
-    if (
-      session?.user &&
-      session.user.id !== ADMIN_USER_ID
-    ) {
-      await supabase.auth.signOut();
-      setAuthUser(null);
       return;
     }
 
@@ -463,6 +492,14 @@ export default function Home() {
       data ?? [];
 
     setBgms(loadedBgms);
+    const counts: Record<number, number> = {};
+    for (let offset = 0; ; offset += 1000) {
+      const { data: sets, error: countError } = await supabase.from("bgm_sets").select("bgm_ids").order("id").range(offset, offset + 999);
+      if (countError) { console.error("人気順の取得に失敗しました", countError); break; }
+      for (const set of sets ?? []) for (const id of new Set<number>(set.bgm_ids ?? [])) counts[id] = (counts[id] ?? 0) + 1;
+      if (!sets || sets.length < 1000) break;
+    }
+    setPopularity(counts);
 
     const params =
       new URLSearchParams(
@@ -488,6 +525,10 @@ export default function Home() {
       restoreSelectedFromStorage(
         loadedBgms
       );
+
+      if (params.get("add") === "1") {
+        openAddForm();
+      }
     }
 
     setLoading(false);
@@ -552,106 +593,16 @@ export default function Home() {
 
     setSharedSet(bgmSet);
     setSelected(restored);
+    const loadedComments = Array.isArray(bgmSet.comments) ? bgmSet.comments : [];
+    setComments(Object.fromEntries(bgmSet.bgm_ids.map((id, index) => [Number(id), typeof loadedComments[index] === "string" ? loadedComments[index] : ""])));
     setStorageLoaded(true);
 
     return true;
   }
 
   // =========================
-  // 管理者ログイン
+  // 管理者セッション（既存の管理機能用）
   // =========================
-
-  async function handleAdminLogin(
-    e: FormEvent<HTMLFormElement>
-  ) {
-    e.preventDefault();
-
-    setLoginError("");
-
-    if (!ADMIN_USER_ID) {
-      setLoginError(
-        "管理者UIDが設定されていません。"
-      );
-      return;
-    }
-
-    if (
-      !loginEmail.trim() ||
-      !loginPassword
-    ) {
-      setLoginError(
-        "メールアドレスとパスワードを入力してください。"
-      );
-      return;
-    }
-
-    setLoginLoading(true);
-
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email: loginEmail.trim(),
-        password: loginPassword,
-      });
-
-    if (error) {
-      console.error(
-        "ログインエラー:",
-        error
-      );
-
-      setLoginError(
-        "メールアドレスまたはパスワードが違います。"
-      );
-
-      setLoginLoading(false);
-      return;
-    }
-
-    if (
-      !data.user ||
-      data.user.id !== ADMIN_USER_ID
-    ) {
-      await supabase.auth.signOut();
-
-      setAuthUser(null);
-
-      setLoginError(
-        "このアカウントには管理者権限がありません。"
-      );
-
-      setLoginLoading(false);
-      return;
-    }
-
-    setAuthUser(data.user);
-
-    setLoginEmail("");
-    setLoginPassword("");
-    setLoginError("");
-    setLoginLoading(false);
-    setShowLoginModal(false);
-  }
-
-  async function handleAdminLogout() {
-    const { error } =
-      await supabase.auth.signOut();
-
-    if (error) {
-      console.error(
-        "ログアウトエラー:",
-        error
-      );
-
-      alert(
-        "ログアウトに失敗しました。"
-      );
-
-      return;
-    }
-
-    setAuthUser(null);
-    closeGameInfoEditor();
-  }
 
   // =========================
   // localStorage
@@ -738,16 +689,18 @@ export default function Home() {
   ]);
 
   // =========================
-  // RAWG検索
+  // ゲーム検索（IGDB）
   // =========================
 
   async function fetchGames(
-    query: string
-  ): Promise<RawgGame[]> {
+    query: string,
+    signal?: AbortSignal
+  ): Promise<GameSearchResult[]> {
     const response = await fetch(
       `/api/games?q=${encodeURIComponent(
         query
-      )}`
+      )}`,
+      { signal }
     );
 
     if (!response.ok) {
@@ -759,7 +712,7 @@ export default function Home() {
     const data =
       await response.json();
 
-    return data.results ?? [];
+    return (data.results ?? []).filter((game: GameSearchResult) => game.source === "igdb" && Number.isSafeInteger(game.id));
   }
 
   // =========================
@@ -767,156 +720,84 @@ export default function Home() {
   // =========================
 
   useEffect(() => {
-    if (!showAddForm) return;
-
-    if (newRawgGameId !== null) {
-      return;
-    }
-
-    const query =
-      newGameTitle.trim();
-
-    if (query.length < 2) {
+    const controller = new AbortController();
+    const query = newGameTitle.trim();
+    const enabled = showAddForm && !gameComposing && newIgdbGameId === null && query.length >= 2;
+    const timer = setTimeout(async () => {
       setGameResults([]);
       setGameSearchError("");
-      return;
-    }
-
-    const timer =
-      setTimeout(
-        async () => {
-          setGameSearching(true);
-          setGameSearchError("");
-
-          try {
-            const results =
-              await fetchGames(
-                query
-              );
-
-            setGameResults(
-              results
-            );
-          } catch (error) {
-            console.error(error);
-
-            setGameResults([]);
-
-            setGameSearchError(
-              "ゲーム検索に失敗しました。"
-            );
-          } finally {
-            setGameSearching(false);
-          }
-        },
-        500
-      );
-
-    return () =>
-      clearTimeout(timer);
-  }, [
-    newGameTitle,
-    newRawgGameId,
-    showAddForm,
-  ]);
-
-  // =========================
-  // 管理者編集用ゲーム検索
-  // =========================
+      setGameSearching(enabled);
+      if (!enabled) return;
+      try {
+        const results = await fetchGames(query, controller.signal);
+        if (!controller.signal.aborted) {
+          setGameResults(results);
+          if (!results.length) setGameSearchError("候補がありません。正式名称や英語名もお試しください。");
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          setGameSearchError("ゲーム検索に失敗しました。");
+        }
+      } finally {
+        if (!controller.signal.aborted) setGameSearching(false);
+      }
+    }, enabled ? 500 : 0);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [newGameTitle, newIgdbGameId, showAddForm, gameComposing]);
 
   useEffect(() => {
-    if (!editingBgm) {
-      return;
-    }
-
-    if (!isAdmin) {
-      return;
-    }
-
-    if (editSelectedGame) {
-      return;
-    }
-
-    const query =
-      editGameQuery.trim();
-
-    if (query.length < 2) {
+    const controller = new AbortController();
+    const query = editGameQuery.trim();
+    const enabled = Boolean(editingBgm && isAdmin && !editGameComposing && !editSelectedGame && query.length >= 2);
+    const timer = setTimeout(async () => {
       setEditGameResults([]);
       setEditGameError("");
-      return;
-    }
-
-    const timer =
-      setTimeout(
-        async () => {
-          setEditGameSearching(true);
-          setEditGameError("");
-
-          try {
-            const results =
-              await fetchGames(
-                query
-              );
-
-            setEditGameResults(
-              results
-            );
-          } catch (error) {
-            console.error(error);
-
-            setEditGameResults([]);
-
-            setEditGameError(
-              "ゲーム検索に失敗しました。"
-            );
-          } finally {
-            setEditGameSearching(false);
-          }
-        },
-        500
-      );
-
-    return () =>
-      clearTimeout(timer);
-  }, [
-    editGameQuery,
-    editSelectedGame,
-    editingBgm,
-    isAdmin,
-  ]);
+      setEditGameSearching(enabled);
+      if (!enabled) return;
+      try {
+        const results = await fetchGames(query, controller.signal);
+        if (!controller.signal.aborted) {
+          setEditGameResults(results);
+          if (!results.length) setEditGameError("候補がありません。正式名称や英語名もお試しください。");
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          setEditGameError("ゲーム検索に失敗しました。");
+        }
+      } finally {
+        if (!controller.signal.aborted) setEditGameSearching(false);
+      }
+    }, enabled ? 500 : 0);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [editGameQuery, editSelectedGame, editingBgm, isAdmin, editGameComposing]);
 
   // =========================
   // 一覧検索
   // =========================
 
-  const filtered =
-    bgms.filter((bgm) => {
-      // 非表示BGMは一般ユーザーの検索一覧には出さない。
-      // 管理者には表示し、再表示できるようにする。
-      if (bgm.is_hidden && !isAdmin) {
-        return false;
-      }
+  useEffect(() => {
+    if (!chosenGame) return;
+    const controller = new AbortController();
+    fetch(`/api/bgms?igdb_game_id=${chosenGame.id}${chosenGame.game_id ? `&game_id=${chosenGame.game_id}` : ""}`, { signal: controller.signal })
+      .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error); return data; })
+      .then(data => { if (!controller.signal.aborted) { setGameBgms(data.bgms); setGameListStatus(""); setGameListReady(true); } })
+      .catch(error => { if (!controller.signal.aborted) setGameListStatus(error.message || "BGMの取得に失敗しました。"); });
+    return () => controller.abort();
+  }, [chosenGame]);
 
-      const q =
-        search
-          .trim()
-          .toLowerCase();
+  function chooseGame(game: GameSearchResult) {
+    setChosenGame(game); setGameBgms([]); setGameListReady(false);
+    setGameListStatus("登録済みBGMを読み込んでいます...");
+    selectGameForNewBgm(game); setConfirmedTitle("");
+  }
 
-      if (!q) return true;
-
-      return (
-        bgm.title
-          .toLowerCase()
-          .includes(q) ||
-        bgm.game_title
-          .toLowerCase()
-          .includes(q) ||
-        (bgm.composer
-          ?.toLowerCase()
-          .includes(q) ??
-          false)
-      );
-    });
+  const visibleGameBgms = bgms;
+  const filtered = visibleGameBgms.filter(bgm => (!bgm.is_hidden || isAdmin) &&
+    (!search.trim() || [bgm.title, bgm.game_title, bgm.composer ?? ""].some(value => matchesSearch(value, search))))
+    .sort((a, b) => (popularity[b.id] ?? 0) - (popularity[a.id] ?? 0) || a.id - b.id);
+  const registrationBgms = [...gameBgms].sort((a, b) => Number(similarTitle(b.title, newTitle)) - Number(similarTitle(a.title, newTitle)) || a.id - b.id);
 
   // =========================
   // 9曲選択
@@ -978,6 +859,23 @@ export default function Home() {
     }
 
     setSelected([]);
+    setComments({});
+  }
+
+  function openCommentEditor(bgm: Bgm) {
+    setCommentingBgm(bgm);
+    setCommentDraft(comments[bgm.id] ?? "");
+    setCommentError("");
+  }
+
+  function saveComment() {
+    if (!commentingBgm) return;
+    const value = commentDraft.normalize("NFKC").trim();
+    if (value.length > 200 || inappropriateText(value)) { setCommentError("コメントは200文字以内で、不適切な表現を含めず入力してください。"); return; }
+    const nextComments = { ...comments, [commentingBgm.id]: value };
+    if (isViewingSharedSet) return;
+    setComments(nextComments);
+    setCommentingBgm(null);
   }
 
   function handleDragEnd(
@@ -991,6 +889,13 @@ export default function Home() {
       event;
 
     if (!over) return;
+    if (active.data.current?.bgmId) {
+      if (over.id === "selection-drop" || selected.some(bgm => bgm.id === over.id)) {
+        const bgm = [...bgms, ...gameBgms].find(item => item.id === active.data.current?.bgmId);
+        if (bgm && !bgm.is_hidden) addBgmToSelection(bgm);
+      }
+      return;
+    }
 
     if (
       active.id === over.id
@@ -1101,9 +1006,13 @@ export default function Home() {
             title:
               publishTitle.trim() ||
               null,
+            creator_name:
+              creatorName.trim() ||
+              null,
             bgm_ids: selected.map(
               (bgm) => bgm.id
             ),
+            comments: selected.map((bgm) => comments[bgm.id] ?? ""),
           }),
         }
       );
@@ -1171,6 +1080,20 @@ export default function Home() {
     }
   }
 
+  function sharePublishedSetOnX() {
+    if (!publishedUrl) return;
+    const text = [
+      "私を彩る9つのBGM",
+      "#My9BGM #私を彩る9つのBGM",
+      publishedUrl,
+    ].join("\n");
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
   function returnToMyEditor() {
     window.location.href =
       window.location.origin +
@@ -1182,15 +1105,17 @@ export default function Home() {
   // =========================
 
   function selectGameForNewBgm(
-    game: RawgGame
+    game: GameSearchResult
   ) {
     setNewGameTitle(
       game.name
     );
 
-    setNewRawgGameId(
+    setNewIgdbGameId(
       game.id
     );
+
+    setNewGameId(game.game_id ?? null);
 
     setNewImageUrl(
       game.image
@@ -1202,18 +1127,25 @@ export default function Home() {
   }
 
   function clearSelectedGame() {
-    setNewRawgGameId(null);
+    setNewIgdbGameId(null);
+    setNewGameId(null);
     setNewImageUrl(null);
     setGameResults([]);
     setAddMessage("");
   }
 
   function resetAddForm() {
+    setChosenGame(null);
+    setGameBgms([]);
+    setGameListStatus("");
+    setGameListReady(false);
+    setConfirmedTitle("");
     setNewTitle("");
     setNewGameTitle("");
     setNewComposer("");
     setNewImageUrl(null);
-    setNewRawgGameId(null);
+    setNewIgdbGameId(null);
+    setNewGameId(null);
     setGameResults([]);
     setGameSearchError("");
     setAddMessage("");
@@ -1222,6 +1154,11 @@ export default function Home() {
   function closeAddForm() {
     setShowAddForm(false);
     resetAddForm();
+  }
+
+  function openAddForm() {
+    resetAddForm();
+    setShowAddForm(true);
   }
 
   async function handleAddBgm(
@@ -1244,7 +1181,7 @@ export default function Home() {
       return;
     }
 
-    if (newRawgGameId === null) {
+    if (newIgdbGameId === null) {
       setAddMessage(
         "ゲーム名を入力したあと、検索結果からゲームを選択してください。"
       );
@@ -1264,8 +1201,8 @@ export default function Home() {
     const duplicate =
       bgms.find(
         (bgm) =>
-          bgm.rawg_game_id ===
-            newRawgGameId &&
+          ((newGameId != null && bgm.game_id === newGameId) ||
+            (newGameId == null && bgm.igdb_game_id === newIgdbGameId)) &&
           (
             bgm.normalized_title ??
             normalizeBgmTitle(
@@ -1281,6 +1218,12 @@ export default function Home() {
       return;
     }
 
+    if (inappropriateText(title) || inappropriateText(composer)) {
+      setAddMessage("不適切な表現が含まれています。入力内容を確認してください。"); return;
+    }
+    if (confirmedTitle !== `${newIgdbGameId}:${title}:${composer}`) {
+      setAddMessage("ゲーム名・曲名・作曲者名を確認し、確認欄にチェックしてください。"); return;
+    }
     setAdding(true);
 
     try {
@@ -1294,7 +1237,8 @@ export default function Home() {
           body: JSON.stringify({
             title,
             composer,
-            rawg_game_id: newRawgGameId,
+            igdb_game_id: newIgdbGameId,
+            game_id: newGameId,
           }),
         }
       );
@@ -1326,9 +1270,9 @@ export default function Home() {
         addedBgm,
       ]);
 
-      setAddMessage(
-        "BGMを追加しました！"
-      );
+      setGameBgms(current => [...current, addedBgm]);
+      setAddMessage("BGMを追加しました！");
+      setConfirmedTitle("");
 
       setTimeout(() => {
         closeAddForm();
@@ -1379,7 +1323,7 @@ export default function Home() {
   }
 
   function selectGameForEdit(
-    game: RawgGame
+    game: GameSearchResult
   ) {
     setEditSelectedGame(game);
     setEditGameQuery(game.name);
@@ -1396,91 +1340,31 @@ export default function Home() {
   }
 
   async function saveGameInfo() {
-    if (
-      !editingBgm ||
-      !editSelectedGame ||
-      !isAdmin
-    ) {
-      return;
-    }
-
+    if (!editingBgm || !editSelectedGame || !isAdmin) return;
     setSavingGameInfo(true);
     setEditSaveError("");
-
-    const normalizedTitle =
-      normalizeBgmTitle(
-        editingBgm.title
-      );
-
-    const nextImageUrl =
-      editSelectedGame.image ??
-      editingBgm.image_url;
-
-    const { data, error } =
-      await supabase
-        .from("bgms")
-        .update({
-          game_title:
-            editSelectedGame.name,
-          rawg_game_id:
-            editSelectedGame.id,
-          normalized_title:
-            normalizedTitle,
-          image_url:
-            nextImageUrl,
-        })
-        .eq(
-          "id",
-          editingBgm.id
-        )
-        .select()
-        .single();
-
-    if (error) {
-      console.error(
-        "ゲーム情報更新エラー:",
-        error
-      );
-
-      if (
-        error.code === "23505"
-      ) {
-        setEditSaveError(
-          "同じゲームに同じBGMがすでに登録されています。重複しているBGMを確認してください。"
-        );
-      } else {
-        setEditSaveError(
-          "ゲーム情報の保存に失敗しました。"
-        );
-      }
-
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("管理者ログインが必要です。");
+      const response = await fetch("/api/bgms", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ bgm_id: editingBgm.id, igdb_game_id: editSelectedGame.id, game_id: editSelectedGame.game_id ?? null }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "ゲーム情報の保存に失敗しました。");
+      const updatedBgm = result.bgm as Bgm;
+      setBgms(current => current.map(bgm => bgm.id === updatedBgm.id ? updatedBgm : bgm));
+      setGameBgms(current => current.flatMap(bgm => bgm.id !== updatedBgm.id ? [bgm] :
+        ((chosenGame?.game_id != null && updatedBgm.game_id === chosenGame.game_id) ||
+          (chosenGame?.game_id == null && updatedBgm.igdb_game_id === chosenGame?.id)) ? [updatedBgm] : []));
+      setSelected(current => current.map(bgm => bgm.id === updatedBgm.id ? updatedBgm : bgm));
+      closeGameInfoEditor();
+    } catch (error) {
+      setEditSaveError(error instanceof Error ? error.message : "ゲーム情報の保存に失敗しました。");
+    } finally {
       setSavingGameInfo(false);
-      return;
     }
-
-    const updatedBgm =
-      data as Bgm;
-
-    setBgms((current) =>
-      current.map((bgm) =>
-        bgm.id ===
-        updatedBgm.id
-          ? updatedBgm
-          : bgm
-      )
-    );
-
-    setSelected((current) =>
-      current.map((bgm) =>
-        bgm.id ===
-        updatedBgm.id
-          ? updatedBgm
-          : bgm
-      )
-    );
-
-    setSavingGameInfo(false);
-    closeGameInfoEditor();
   }
 
   // =========================
@@ -1730,6 +1614,8 @@ export default function Home() {
 
     const updatedBgm = data as Bgm;
 
+    setGameBgms(current => current.map(bgm => bgm.id === updatedBgm.id ? updatedBgm : bgm));
+
     setBgms((current) =>
       current.map((bgm) =>
         bgm.id === updatedBgm.id ? updatedBgm : bgm
@@ -1892,7 +1778,7 @@ export default function Home() {
   // 3×3画像生成
   // =========================
 
-  async function generateShareImage() {
+  async function generateShareImage(openModal = true) {
     if (
       selected.length !== 9
     ) {
@@ -2151,9 +2037,9 @@ export default function Home() {
         dataUrl
       );
 
-      setShowShareModal(
-        true
-      );
+      if (openModal) {
+        setShowShareModal(true);
+      }
     } catch (error) {
       console.error(
         "画像生成エラー:",
@@ -2169,6 +2055,13 @@ export default function Home() {
       );
     }
   }
+
+  useEffect(() => {
+    if (isViewingSharedSet && selected.length === 9) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void generateShareImage(false);
+    }
+  }, [isViewingSharedSet, selected]);
 
   function downloadShareImage() {
     if (!generatedImage) {
@@ -2190,6 +2083,7 @@ export default function Home() {
   }
 
   return (
+    <DndContext sensors={sensors} collisionDetection={args => args.active.data.current?.bgmId ? pointerWithin(args) : closestCenter({ ...args, droppableContainers: args.droppableContainers.filter(item => item.id !== "selection-drop") })} onDragEnd={handleDragEnd}>
     <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#f5f8fc] text-slate-900">
       <header className="w-full border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-16 w-full max-w-[1400px] items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
@@ -2207,7 +2101,7 @@ export default function Home() {
                 type="button"
                 onClick={returnToMyEditor}
                 className={`py-5 ${
-                  !isViewingSharedSet
+                  !loading && !isViewingSharedSet
                     ? "border-b-2 border-sky-500 text-slate-900"
                     : "text-slate-500 hover:text-slate-900"
                 }`}
@@ -2217,16 +2111,14 @@ export default function Home() {
 
               <a
                 href="/community"
-                className="py-5 text-slate-500 hover:text-slate-900"
+                className={`py-5 ${!loading && isViewingSharedSet ? "border-b-2 border-sky-500 text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
               >
                 みんなの9つのBGM
               </a>
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowAddForm(true)
-                }
+                onClick={() => openAddForm()}
                 className="py-5 text-slate-500 hover:text-slate-900"
               >
                 BGMを追加
@@ -2241,57 +2133,12 @@ export default function Home() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
-            {isAdmin ? (
-              <>
-                <div className="hidden text-right md:block">
-                  <p className="text-xs font-bold text-emerald-600">
-                    ADMIN
-                  </p>
-
-                  <p className="max-w-[200px] truncate text-xs text-slate-400">
-                    {authUser?.email}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={openReportManager}
-                  className="relative rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100"
-                >
-                  ⚠ 通報管理
-                  {adminReports.filter((report) => report.status === "pending").length > 0 && (
-                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {adminReports.filter((report) => report.status === "pending").length}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={
-                    handleAdminLogout
-                  }
-                  className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 sm:px-4 sm:text-sm sm:text-slate-600"
-                >
-                  ログアウト
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginError("");
-                  setShowLoginModal(
-                    true
-                  );
-                }}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                管理者ログイン
-              </button>
-            )}
-          </div>
+          {isAdmin && (
+            <button type="button" onClick={openReportManager} className="relative rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100">
+              ⚠ 通報管理
+              {adminReports.filter(report => report.status === "pending").length > 0 && <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{adminReports.filter(report => report.status === "pending").length}</span>}
+            </button>
+          )}
         </div>
 
         <nav className="grid w-full grid-cols-4 border-t border-slate-100 bg-white text-[11px] font-semibold md:hidden">
@@ -2299,7 +2146,7 @@ export default function Home() {
             type="button"
             onClick={returnToMyEditor}
             className={`min-w-0 px-1 py-3 text-center ${
-              !isViewingSharedSet
+              !loading && !isViewingSharedSet
                 ? "border-b-2 border-sky-500 text-slate-900"
                 : "text-slate-500"
             }`}
@@ -2309,14 +2156,14 @@ export default function Home() {
 
           <a
             href="/community"
-            className="min-w-0 px-1 py-3 text-center text-slate-500"
+            className={`min-w-0 px-1 py-3 text-center ${!loading && isViewingSharedSet ? "border-b-2 border-sky-500 text-slate-900" : "text-slate-500"}`}
           >
             みんなのBGM
           </a>
 
           <button
             type="button"
-            onClick={() => setShowAddForm(true)}
+            onClick={() => openAddForm()}
             className="min-w-0 px-1 py-3 text-center text-slate-500"
           >
             BGMを追加
@@ -2330,6 +2177,12 @@ export default function Home() {
           </a>
         </nav>
       </header>
+
+      {loading && (
+        <div className="mx-auto flex min-h-[55vh] max-w-[1400px] items-center justify-center px-6 text-sm text-slate-500">
+          ページを読み込んでいます...
+        </div>
+      )}
 
       {isAdmin && (
         <div className="border-b border-emerald-200 bg-emerald-50">
@@ -2364,24 +2217,23 @@ export default function Home() {
         </div>
       )}
 
-      <div className="mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 sm:py-10">
+      <div className={`mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 sm:py-10 ${loading ? "hidden" : ""}`}>
         <div className="mb-7 sm:mb-9">
           <p className="mb-2 text-xs font-bold tracking-[0.25em] text-sky-500 sm:text-sm">
-            MY 9 GAME BGM
+            {isViewingSharedSet ? "MY 9 BY" : "MY 9 GAME BGM"}
           </p>
 
           <h1 className="text-2xl font-bold leading-tight sm:text-4xl">
             {isViewingSharedSet
-              ? sharedSet.title ||
-                "共有された9つのゲームBGM"
-              : "私を構成する9つのゲームBGM"}
+              ? sharedSet.creator_name || "匿名"
+              : "私を彩る9つのBGM"}
           </h1>
 
-          <p className="mt-3 text-sm text-slate-500 sm:text-base">
-            {isViewingSharedSet
-              ? "誰かが選んだ、忘れられない9つのゲームBGM。"
-              : "ゲームの中で出会った、忘れられない9つの音を選ぼう。"}
-          </p>
+          {isViewingSharedSet && (
+            <p className="mt-3 text-sm text-slate-500 sm:text-base">
+              {sharedSet.title || "私を彩る9つのBGM"}
+            </p>
+          )}
         </div>
 
         {sharedSetError && (
@@ -2392,15 +2244,34 @@ export default function Home() {
 
         <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_520px] lg:gap-10">
           <section className="min-w-0">
+            {isViewingSharedSet && (
+              <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+                {generatedImage ? (
+                  <img src={generatedImage} alt="9つのBGM共有画像" className="aspect-square w-full rounded-2xl object-cover" />
+                ) : (
+                  <div className="flex aspect-square items-center justify-center rounded-2xl bg-slate-100 text-sm text-slate-500">
+                    9つのBGM画像を作成しています...
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isViewingSharedSet && (<>
+            <div className="mb-6 rounded-2xl border border-sky-100 bg-white p-4">
+              <label className="block text-sm font-bold">
+                名前
+                <input value={creatorName} onChange={e => updateCreatorName(e.target.value)} maxLength={30} placeholder="" className="mt-2 w-full rounded-xl border border-slate-300 p-3 font-normal outline-none focus:border-sky-400" />
+              </label>
+            </div>
+            <p className="mb-3 text-xs text-slate-500"></p>
             <input
               type="text"
               placeholder="BGM名・ゲーム名・作曲者で検索..."
               value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setVisibleBgmCount(BGM_PAGE_SIZE);
+              }}
               className="mb-6 h-[52px] w-full max-w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none focus:border-sky-400 sm:px-5 sm:text-base"
             />
 
@@ -2408,13 +2279,21 @@ export default function Home() {
               <div className="rounded-2xl bg-white p-10 text-center text-slate-500">
                 BGMを読み込んでいます...
               </div>
-            ) : filtered.length === 0 ? (
-              <div className="rounded-2xl bg-white p-10 text-center">
-                BGMが見つかりませんでした
-              </div>
-            ) : (
+         ) : filtered.length === 0 ? (
+  <div className="rounded-2xl bg-white p-10 text-center">
+    <p className="font-medium text-slate-700">
+      BGMが見つかりませんでした。
+    </p>
+    <p className="mt-2 text-sm text-slate-500">
+      日本語、英語等表記を変えて検索するか、
+      <br className="sm:hidden" />
+      未登録の場合は「新しいBGMを追加」から登録できます。
+    </p>
+  </div>
+) : (
+              <>
               <div className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
-                {filtered.map(
+                {filtered.slice(0, visibleBgmCount).map(
                   (bgm) => {
                     const alreadySelected =
                       selected.some(
@@ -2426,7 +2305,21 @@ export default function Home() {
                     return (
                       <div
                         key={bgm.id}
-                        className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${bgm.title}を拡大表示`}
+                        onClick={(event) => {
+                          if ((event.target as HTMLElement).closest("button, summary, details, a")) return;
+                          if (window.getSelection()?.toString()) return;
+                          setPreviewBgm(bgm);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setPreviewBgm(bgm);
+                          }
+                        }}
+                        className="min-w-0 cursor-pointer overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                       >
                         <div className="relative aspect-square">
                           <NextImage
@@ -2465,9 +2358,14 @@ export default function Home() {
                         </div>
 
                         <div className="min-w-0 p-3 sm:p-4">
-                          <p className="truncate text-sm font-bold sm:text-base">
-                            {bgm.title}
-                          </p>
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className="min-w-0 flex-1 truncate text-sm font-bold sm:text-base">
+                              {bgm.title}
+                            </p>
+
+                            <details className="group/menu relative flex-none">
+                              <summary aria-label={`${bgm.title}のメニュー`} className="flex h-6 w-6 list-none items-center justify-center rounded-full font-bold leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-900 [&::-webkit-details-marker]:hidden">⋯</summary>
+                              <div className="absolute right-0 top-7 z-20 w-52 rounded-xl bg-white p-3 shadow-xl ring-1 ring-slate-200">
 
                           <p className="mt-1 truncate text-xs text-slate-500 sm:text-sm">
                             {bgm.game_title}
@@ -2492,13 +2390,13 @@ export default function Home() {
                           {isAdmin && (
                             <>
                               <div className="mt-3">
-                                {bgm.rawg_game_id ? (
+                                {(bgm.igdb_game_id || bgm.rawg_game_id) ? (
                                   <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
                                     <span>
                                       ✓
                                     </span>
                                     <span>
-                                      RAWG連携済み
+                                      ゲーム連携済み
                                     </span>
                                   </div>
                                 ) : (
@@ -2507,7 +2405,7 @@ export default function Home() {
                                       ⚠
                                     </span>
                                     <span>
-                                      RAWG未設定
+                                      ゲーム未設定
                                     </span>
                                   </div>
                                 )}
@@ -2521,12 +2419,12 @@ export default function Home() {
                                   )
                                 }
                                 className={`mt-2 w-full rounded-xl border px-3 py-2 text-xs font-semibold ${
-                                  bgm.rawg_game_id
+                                  (bgm.igdb_game_id || bgm.rawg_game_id)
                                     ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                                     : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
                                 }`}
                               >
-                                {bgm.rawg_game_id
+                                {(bgm.igdb_game_id || bgm.rawg_game_id)
                                   ? "🛠 ゲーム情報・画像を変更"
                                   : "🛠 ゲーム情報を設定"}
                               </button>
@@ -2558,12 +2456,28 @@ export default function Home() {
                               )}
                             </>
                           )}
+                              </div>
+                            </details>
+                          </div>
                         </div>
                       </div>
                     );
                   }
                 )}
               </div>
+
+              {visibleBgmCount < filtered.length && (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleBgmCount((count) => count + BGM_PAGE_SIZE)}
+                    className="rounded-xl border border-slate-300 bg-white px-8 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  >
+                    さらに表示（残り{filtered.length - visibleBgmCount}曲）
+                  </button>
+                </div>
+              )}
+              </>
             )}
 
             {!isViewingSharedSet && (
@@ -2572,27 +2486,23 @@ export default function Home() {
                   探しているBGMが見つかりませんか？
                 </p>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  みんなでBGMデータベースを育てていきます。
-                </p>
-
                 <button
                   type="button"
                   onClick={() =>
-                    setShowAddForm(
-                      true
-                    )
+                    openAddForm()
                   }
-                  className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-semibold shadow-sm"
+                  className="mt-4 rounded-xl border border-sky-200 bg-white px-4 py-3 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-100 hover:shadow-md focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
                   ＋ 新しいBGMを追加
                 </button>
               </div>
             )}
+            </>)}
           </section>
 
-          <section className="min-w-0">
-            <div className="sticky top-8 w-full min-w-0">
+          {!loading && (
+            <section className="min-w-0">
+              <div className="sticky top-8 w-full min-w-0">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="min-w-0 text-sm font-bold tracking-[0.14em] sm:text-base sm:tracking-[0.18em]">
                   SELECTED BGM ·{" "}
@@ -2612,15 +2522,7 @@ export default function Home() {
                 )}
               </div>
 
-              <DndContext
-                sensors={sensors}
-                collisionDetection={
-                  closestCenter
-                }
-                onDragEnd={
-                  handleDragEnd
-                }
-              >
+              <SelectionDrop disabled={isViewingSharedSet}>
                 <SortableContext
                   items={selected.map(
                     (bgm) => bgm.id
@@ -2648,6 +2550,9 @@ export default function Home() {
                           readOnly={
                             isViewingSharedSet
                           }
+                          comment={comments[bgm.id] ?? ""}
+                          canEditComment={!isViewingSharedSet}
+                          onEditComment={() => openCommentEditor(bgm)}
                         />
                       )
                     )}
@@ -2683,13 +2588,11 @@ export default function Home() {
                     )}
                   </div>
                 </SortableContext>
-              </DndContext>
+              </SelectionDrop>
 
               <button
                 type="button"
-                onClick={
-                  generateShareImage
-                }
+                onClick={() => void generateShareImage()}
                 disabled={
                   selected.length !== 9 ||
                   generatingImage
@@ -2698,7 +2601,7 @@ export default function Home() {
               >
                 {generatingImage
                   ? "画像を作成しています..."
-                  : "9つのBGM画像を作成"}
+                  : "画像を作成"}
               </button>
 
               {!isViewingSharedSet && (
@@ -2712,7 +2615,7 @@ export default function Home() {
                   }
                   className="mt-3 w-full max-w-full rounded-2xl bg-sky-500 px-3 py-4 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
                 >
-                  🌐 みんなに公開する
+                  🌐公開する
                 </button>
               )}
 
@@ -2727,10 +2630,70 @@ export default function Home() {
                   自分の9曲を作る
                 </button>
               )}
-            </div>
-          </section>
+              </div>
+            </section>
+          )}
         </div>
       </div>
+
+      {previewBgm && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${previewBgm.title}の拡大表示`}
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/55 p-5 outline-none sm:p-8"
+        >
+          <button
+            type="button"
+            autoFocus
+            aria-label="拡大表示を閉じる"
+            onClick={() => setPreviewBgm(null)}
+            className="absolute inset-0 cursor-default"
+          />
+          <div
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-white/30 bg-white shadow-2xl"
+          >
+            <div className="relative aspect-square w-full bg-slate-100">
+              <NextImage
+                src={getImageUrl(previewBgm, "900x900")}
+                alt={previewBgm.title}
+                fill
+                priority
+                sizes="(max-width: 640px) calc(100vw - 40px), 448px"
+                className="object-cover"
+              />
+            </div>
+            <div className="p-5 sm:p-6">
+              <p className="break-words text-xl font-bold leading-snug text-slate-950 sm:text-2xl">
+                {previewBgm.title}
+              </p>
+              <p className="mt-2 break-words text-sm text-slate-600 sm:text-base">
+                {previewBgm.game_title}
+              </p>
+              {previewBgm.composer && (
+                <p className="mt-2 break-words text-xs text-slate-400 sm:text-sm">
+                  {previewBgm.composer}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {commentingBgm && (
+        <div onClick={() => setCommentingBgm(null)} className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 px-4">
+          <div onClick={(event) => event.stopPropagation()} className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div><p className="text-xs font-bold tracking-[0.18em] text-sky-500">COMMENT</p><h2 className="mt-1 text-xl font-bold">{comments[commentingBgm.id] ? "コメントを編集" : "コメントを追加"}</h2></div>
+              <button type="button" onClick={() => setCommentingBgm(null)} className="text-2xl text-slate-400">×</button>
+            </div>
+            <p className="mt-4 text-sm font-semibold text-slate-700">{commentingBgm.title}</p>
+            <textarea value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} maxLength={200} rows={4} placeholder="このBGMへの思い出や感想を入力" className="mt-3 w-full resize-none rounded-2xl border border-slate-300 p-3 text-sm outline-none focus:border-sky-400" />
+            <div className="mt-1 flex justify-between text-xs text-slate-400"><span>{commentError}</span><span>{commentDraft.length}/200</span></div>
+            <button type="button" onClick={saveComment} className="mt-4 w-full rounded-2xl bg-sky-500 px-4 py-3 font-bold text-white">保存</button>
+          </div>
+        </div>
+      )}
 
       {/* 公開モーダル */}
 
@@ -2774,6 +2737,7 @@ export default function Home() {
                 <p className="mb-5 text-sm leading-6 text-slate-500">
                   選んだ9曲と並び順を公開します。
                 </p>
+                <p className="mb-4 text-sm text-slate-600">作成者：{creatorName.trim() || "匿名"}</p>
 
                 <label className="mb-2 block text-sm font-semibold">
                   タイトル
@@ -2791,7 +2755,7 @@ export default function Home() {
                     )
                   }
                   maxLength={100}
-                  placeholder="例：私を構成する9つのBGM"
+                  placeholder="例：私を彩る9つのBGM"
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400"
                 />
 
@@ -2845,14 +2809,19 @@ export default function Home() {
                   </button>
                 </div>
 
-                <a
-                  href={publishedUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 block w-full rounded-xl border border-slate-200 py-3 text-center text-sm font-semibold text-slate-700"
-                >
-                  共有ページを開いて確認 →
-                </a>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <a
+                    href={publishedUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-700"
+                  >
+                    共有ページを開いて確認 →
+                  </a>
+                  <button type="button" onClick={sharePublishedSetOnX} className="rounded-xl bg-black px-3 py-3 text-sm font-bold text-white hover:bg-slate-800">
+                    Xにシェア
+                  </button>
+                </div>
               </>
             )}
           </div>
@@ -2860,76 +2829,6 @@ export default function Home() {
       )}
 
       {/* 管理者ログイン */}
-
-      {showLoginModal && (
-        <div
-          onClick={() =>
-            setShowLoginModal(
-              false
-            )
-          }
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4"
-        >
-          <div
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-            className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl"
-          >
-            <h2 className="mb-5 text-2xl font-bold">
-              管理者ログイン
-            </h2>
-
-            <form
-              onSubmit={
-                handleAdminLogin
-              }
-            >
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(e) =>
-                  setLoginEmail(
-                    e.target.value
-                  )
-                }
-                placeholder="メールアドレス"
-                className="mb-4 w-full rounded-xl border px-4 py-3"
-              />
-
-              <input
-                type="password"
-                value={loginPassword}
-                onChange={(e) =>
-                  setLoginPassword(
-                    e.target.value
-                  )
-                }
-                placeholder="パスワード"
-                className="w-full rounded-xl border px-4 py-3"
-              />
-
-              {loginError && (
-                <p className="mt-4 text-sm text-red-500">
-                  {loginError}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={
-                  loginLoading
-                }
-                className="mt-6 w-full rounded-xl bg-slate-900 py-3.5 font-bold text-white"
-              >
-                {loginLoading
-                  ? "ログイン中..."
-                  : "ログイン"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* BGM追加 */}
 
@@ -2974,37 +2873,26 @@ export default function Home() {
               }
             >
               <label className="mb-2 block text-sm font-semibold">
-                BGM名
-              </label>
-
-              <input
-                value={newTitle}
-                onChange={(e) =>
-                  setNewTitle(
-                    e.target.value
-                  )
-                }
-                className="mb-5 w-full rounded-xl border border-slate-200 px-4 py-3"
-                placeholder="例：星に駆られて"
-                maxLength={150}
-              />
-
-              <label className="mb-2 block text-sm font-semibold">
                 ゲーム
               </label>
 
-              {newRawgGameId === null ? (
+              {newIgdbGameId === null ? (
                 <>
                   <input
                     value={newGameTitle}
+                    onCompositionStart={() => setGameComposing(true)}
+                    onCompositionEnd={() => setGameComposing(false)}
                     onChange={(e) => {
+                      setGameResults([]);
                       setNewGameTitle(
                         e.target.value
                       );
 
-                      setNewRawgGameId(
+                      setNewIgdbGameId(
                         null
                       );
+
+                      setNewGameId(null);
 
                       setNewImageUrl(
                         null
@@ -3043,9 +2931,7 @@ export default function Home() {
                             key={game.id}
                             type="button"
                             onClick={() =>
-                              selectGameForNewBgm(
-                                game
-                              )
+                              chooseGame(game)
                             }
                             className="flex w-full items-center gap-4 border-b border-slate-100 p-3 text-left transition last:border-b-0 hover:bg-sky-50"
                           >
@@ -3108,9 +2994,9 @@ export default function Home() {
                       </p>
 
                       <p className="mt-1 text-xs text-slate-400">
-                        RAWG ID:{" "}
+                        IGDB ID:{" "}
                         {
-                          newRawgGameId
+                          newIgdbGameId
                         }
                       </p>
                     </div>
@@ -3128,6 +3014,31 @@ export default function Home() {
                 </div>
               )}
 
+              {newIgdbGameId !== null && <div className="mt-5 rounded-xl border p-4">
+                <h3 className="font-bold">このゲームに登録されているBGM</h3>
+                <p role="status" className="my-2 text-sm text-slate-500">{gameListStatus || (gameBgms.length ? "同じ曲があれば一覧から選択してください。曲名の表記も確認できます。" : "まだBGMがありません。下から登録できます。")}</p>
+                <div className="max-h-48 space-y-2 overflow-y-auto">{registrationBgms.map(bgm => <button type="button" key={bgm.id} onClick={() => { addBgmToSelection(bgm); closeAddForm(); }} className="block w-full rounded-lg bg-slate-50 p-3 text-left hover:bg-sky-50">{bgm.title}<span className="ml-2 text-xs text-slate-400">{bgm.composer}</span></button>)}</div>
+                {!gameListReady && !gameListStatus.includes("読み込んで") && chosenGame && <button type="button" onClick={() => chooseGame({ ...chosenGame })}>再読み込み</button>}
+              </div>}
+              {newIgdbGameId !== null && gameListReady && <>
+              <p className="my-4 text-sm text-slate-500">探している曲がなければ登録してください。別ゲームの同名曲は別々に登録できます。</p>
+              <label className="mb-2 block text-sm font-semibold">
+                BGM名
+              </label>
+
+              <input
+                value={newTitle}
+                onChange={(e) =>
+                  setNewTitle(
+                    e.target.value
+                  )
+                }
+                className="mb-5 w-full rounded-xl border border-slate-200 px-4 py-3"
+                placeholder="例：星に駆られて"
+                maxLength={150}
+              />
+
+
               <label className="mb-2 mt-5 block text-sm font-semibold">
                 作曲者
                 <span className="ml-2 font-normal text-slate-400">
@@ -3143,10 +3054,16 @@ export default function Home() {
                   )
                 }
                 className="w-full rounded-xl border border-slate-200 px-4 py-3"
-                placeholder="例：牧野忠義"
-                maxLength={150}
+                placeholder=""
+                maxLength={100}
               />
 
+              {newTitle.trim() && <div className="mt-4 rounded-xl bg-amber-50 p-3 text-sm">
+                <p>{newGameTitle} ／ {newTitle} {newComposer && `／ ${newComposer}`}</p>
+                {gameBgms.some(bgm => similarTitle(bgm.title, newTitle)) && <p className="mt-2 font-semibold">似た曲名があります。一覧で同じ曲がないか確認してください。</p>}
+                <label className="mt-3 flex items-start gap-2"><input type="checkbox" checked={confirmedTitle === `${newIgdbGameId}:${newTitle.trim()}:${newComposer.trim()}`} onChange={e => setConfirmedTitle(e.target.checked ? `${newIgdbGameId}:${newTitle.trim()}:${newComposer.trim()}` : "")} />表記・誤字と登録済みの曲を確認しました</label>
+              </div>}
+              </>}
               {addMessage && (
                 <div
                   className={`mt-5 rounded-xl px-4 py-3 text-sm ${
@@ -3164,15 +3081,15 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={
-                  adding ||
-                  newRawgGameId ===
+                  adding || !gameListReady || !newTitle.trim() || confirmedTitle !== `${newIgdbGameId}:${newTitle.trim()}:${newComposer.trim()}` ||
+                  newIgdbGameId ===
                     null
                 }
                 className="mt-6 w-full rounded-xl bg-slate-900 py-3.5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-30"
               >
                 {adding
                   ? "追加しています..."
-                  : newRawgGameId ===
+                  : newIgdbGameId ===
                       null
                     ? "ゲームを選択してください"
                     : "BGMを追加"}
@@ -3244,16 +3161,15 @@ export default function Home() {
                 </p>
 
                 <p className="mt-1 text-sm">
-                  RAWG ID：
+                  ゲームID：
                   <span
                     className={
-                      editingBgm.rawg_game_id
+                      (editingBgm.igdb_game_id || editingBgm.rawg_game_id)
                         ? "font-semibold text-emerald-600"
                         : "font-semibold text-amber-600"
                     }
                   >
-                    {editingBgm.rawg_game_id ??
-                      "未設定"}
+                    {editingBgm.igdb_game_id ? `IGDB: ${editingBgm.igdb_game_id}` : editingBgm.rawg_game_id ? `RAWG: ${editingBgm.rawg_game_id}` : "未設定"}
                   </span>
                 </p>
 
@@ -3269,18 +3185,19 @@ export default function Home() {
               {!editSelectedGame ? (
                 <>
                   <label className="mb-2 block text-sm font-semibold">
-                    RAWGでゲームを検索
+                    ゲームを検索
                   </label>
 
                   <input
                     value={
                       editGameQuery
                     }
-                    onChange={(e) =>
-                      setEditGameQuery(
-                        e.target.value
-                      )
-                    }
+                    onCompositionStart={() => setEditGameComposing(true)}
+                    onCompositionEnd={() => setEditGameComposing(false)}
+                    onChange={(e) => {
+                      setEditGameResults([]);
+                      setEditGameQuery(e.target.value);
+                    }}
                     className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-emerald-400"
                     placeholder="ゲーム名を入力..."
                   />
@@ -3340,7 +3257,7 @@ export default function Home() {
                               </p>
 
                               <p className="mt-1 text-xs text-slate-400">
-                                RAWG ID:{" "}
+                                IGDB ID:{" "}
                                 {
                                   game.id
                                 }
@@ -3398,7 +3315,7 @@ export default function Home() {
                       </p>
 
                       <p className="mt-2 text-sm text-slate-500">
-                        RAWG ID:{" "}
+                        IGDB ID:{" "}
                         {
                           editSelectedGame.id
                         }
@@ -3428,7 +3345,7 @@ export default function Home() {
                   <div className="mt-5 rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-700">
                     保存すると、
                     <strong>
-                      game_title / rawg_game_id / normalized_title / image_url
+                      ゲーム情報・画像
                     </strong>
                     が更新されます。
                   </div>
@@ -3950,7 +3867,7 @@ export default function Home() {
 
               <img
                 src={generatedImage}
-                alt="私を構成する9つのゲームBGM"
+                alt="私を彩る9つのBGM"
                 className="mx-auto w-full max-w-[650px] rounded-2xl shadow-lg"
               />
 
@@ -3992,9 +3909,10 @@ export default function Home() {
             className="underline hover:text-slate-600"
           >
             RAWG
-          </a>
+          </a>{" / "}<a href="https://www.igdb.com/" target="_blank" rel="noreferrer" className="underline hover:text-slate-600">IGDB</a>
         </p>
       </footer>
     </main>
+    </DndContext>
   );
 }

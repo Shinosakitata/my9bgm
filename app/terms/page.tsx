@@ -7,12 +7,12 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800">
       <div className="mx-auto max-w-3xl px-5 py-12 sm:py-16">
-        <a
+        <Link
           href="/"
           className="text-sm font-semibold text-sky-600 hover:text-sky-700"
         >
           ← My 9 BGMに戻る
-        </a>
+        </Link>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
           <p className="text-xs font-bold tracking-[0.2em] text-sky-500">
@@ -137,3 +137,4 @@ export default function TermsPage() {
     </main>
   );
 }
+import Link from "next/link";

@@ -7,12 +7,12 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800">
       <div className="mx-auto max-w-3xl px-5 py-12 sm:py-16">
-        <a
+        <Link
           href="/"
           className="text-sm font-semibold text-sky-600 hover:text-sky-700"
         >
           ← My 9 BGMに戻る
-        </a>
+        </Link>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
           <p className="text-xs font-bold tracking-[0.2em] text-sky-500">
@@ -38,6 +38,7 @@ export default function PrivacyPage() {
               <ul className="mt-3 list-disc space-y-2 pl-6">
                 <li>ユーザーが投稿したBGM名、ゲーム名その他の投稿情報</li>
                 <li>ユーザーが作成・公開したMY 9に関する情報</li>
+                <li>MY 9公開時に入力した作成者名</li>
                 <li>通報理由および通報時に入力された内容</li>
                 <li>アクセス日時、リクエスト情報その他サービス運用に必要な技術情報</li>
                 <li>不正利用防止やアクセス制限のために処理されるIPアドレス</li>
@@ -81,7 +82,7 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-bold">6. 外部サービスの利用</h2>
               <p className="mt-3">
                 本サービスでは、データ保存、ホスティング、ゲーム情報・画像の取得などのために、
-                Supabase、Vercel、RAWG等の第三者サービスを利用しています。
+                Supabase、Vercel、RAWG、IGDB等の第三者サービスを利用しています。
                 これらのサービスにおける情報の取扱いについては、
                 各サービス提供者のプライバシーポリシー等が適用される場合があります。
               </p>
@@ -133,3 +134,4 @@ export default function PrivacyPage() {
     </main>
   );
 }
+import Link from "next/link";

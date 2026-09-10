@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { enforceRateLimit } from "../../../lib/rateLimit";
+import { usernameError, inappropriateText } from "../../../lib/textValidation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -25,6 +26,14 @@ function createShareId() {
   const bytes = randomBytes(12);
 
   return Array.from(bytes, (value) => chars[value % chars.length]).join("");
+}
+
+function normalizeComments(value: unknown) {
+  if (value === null || value === undefined) return Array(9).fill("") as string[];
+  if (!Array.isArray(value) || value.length !== 9 || value.some((comment) => typeof comment !== "string")) return null;
+  const comments = value.map((comment) => comment.normalize("NFKC").trim());
+  if (comments.some((comment) => comment.length > 200 || inappropriateText(comment))) return null;
+  return comments;
 }
 
 export async function POST(request: NextRequest) {
@@ -103,6 +112,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (inappropriateText(title)) return NextResponse.json({ error: "タイトルに不適切な表現が含まれています。" }, { status: 400 });
+  const rawCreatorName = "creator_name" in body ? body.creator_name : null;
+  if (rawCreatorName !== null && rawCreatorName !== undefined && typeof rawCreatorName !== "string") return NextResponse.json({ error: "作成者名が正しくありません。" }, { status: 400 });
+  const creatorName = typeof rawCreatorName === "string" ? rawCreatorName.normalize("NFKC").trim() : "";
+  if (creatorName && usernameError(creatorName)) return NextResponse.json({ error: usernameError(creatorName) }, { status: 400 });
+  const creator = creatorName ? { creator_name: creatorName } : undefined;
+  const comments = normalizeComments("comments" in body ? body.comments : null);
+  if (!comments) return NextResponse.json({ error: "コメントは各200文字以内で、不適切な表現を含めず入力してください。" }, { status: 400 });
+
   if (!Array.isArray(bgmIds) || bgmIds.length !== 9) {
     return NextResponse.json(
       { error: "公開するには9曲すべて選択してください。" },
@@ -172,6 +190,8 @@ export async function POST(request: NextRequest) {
         share_id: shareId,
         title: title || null,
         bgm_ids: normalizedIds,
+        comments,
+        ...creator,
       });
 
     if (!error) {
@@ -183,6 +203,10 @@ export async function POST(request: NextRequest) {
 
     if (error.code === "23505") {
       continue;
+    }
+
+    if (error.code === "PGRST204" || error.code === "42703") {
+      return NextResponse.json({ error: "コメント保存機能は準備中です。管理者によるDB設定の完了後にお試しください。" }, { status: 503 });
     }
 
     console.error("MY 9公開エラー:", error);

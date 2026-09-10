@@ -2,27 +2,39 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 import { enforceRateLimit } from "../../../lib/rateLimit";
+import { inappropriateText } from "../../../lib/textValidation";
+import { belongsToGame } from "../../../lib/bgmGame";
 
-type RawgGameDetail = {
-  id: number;
-  name: string;
-  background_image: string | null;
-};
+import { parseGameReference, verifyGame, findDuplicateBgm, gameColumns, normalizeBgmTitle, type VerifiedGame } from "../../../lib/bgmGame";
 
 const MAX_TITLE_LENGTH = 150;
 const MAX_COMPOSER_LENGTH = 100;
 
-function normalizeBgmTitle(value: string) {
-  return value
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[\s　]/g, "")
-    .replace(
-      /[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~！？。、・「」『』【】（）［］｛｝〜ー]/g,
-      ""
-    )
-    .trim();
+export async function GET(request: NextRequest) {
+  const supabase = getServerSupabase();
+  if (!supabase) return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+  const id = Number(request.nextUrl.searchParams.get("igdb_game_id"));
+  const gameIdParam = request.nextUrl.searchParams.get("game_id");
+  const gameId = gameIdParam == null ? null : Number(gameIdParam);
+  if (!Number.isSafeInteger(id) || id <= 0) return NextResponse.json({ error: "ゲームを選択してください。" }, { status: 400 });
+  if (gameId != null && (!Number.isSafeInteger(gameId) || gameId <= 0)) return NextResponse.json({ error: "ゲームを選択してください。" }, { status: 400 });
+  try {
+    const game = await verifyGame({ source: "igdb", id, ...(gameId == null ? {} : { gameId }) }, supabase);
+    if (!game) return NextResponse.json({ error: "ゲームが見つかりません。" }, { status: 404 });
+    const rows = [];
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await supabase.from("bgms").select("*").eq("is_hidden", false).order("id").range(offset, offset + 999);
+      if (error) throw error;
+      rows.push(...(data ?? []).filter(row => belongsToGame(row, game)));
+      if (!data || data.length < 1000) break;
+    }
+    return NextResponse.json({ bgms: rows });
+  } catch {
+    return NextResponse.json({ error: "登録済みBGMを取得できませんでした。もう一度お試しください。" }, { status: 502 });
+  }
 }
+
+
 
 function containsControlCharacters(value: string) {
   return /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(value);
@@ -88,17 +100,6 @@ export async function POST(request: NextRequest) {
     return rateLimitResponse;
   }
 
-  const rawgApiKey = process.env.RAWG_API_KEY;
-
-  if (!rawgApiKey) {
-    console.error("RAWG_API_KEY が設定されていません。");
-
-    return NextResponse.json(
-      { error: "Server configuration error" },
-      { status: 500 }
-    );
-  }
-
   const contentType = request.headers.get("content-type") ?? "";
 
   if (!contentType.toLowerCase().includes("application/json")) {
@@ -138,10 +139,11 @@ export async function POST(request: NextRequest) {
       ? payload.composer
       : "";
 
-  const rawgGameId =
-    typeof payload.rawg_game_id === "number"
-      ? payload.rawg_game_id
-      : Number(payload.rawg_game_id);
+  if (inappropriateText(rawTitle) || inappropriateText(rawComposer)) {
+    return NextResponse.json({ error: "不適切な表現が含まれています。BGM名・作曲者名を確認してください。" }, { status: 400 });
+  }
+
+  const reference = parseGameReference(payload);
 
   if (!rawTitle.trim()) {
     return NextResponse.json(
@@ -226,7 +228,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!Number.isSafeInteger(rawgGameId) || rawgGameId <= 0) {
+  if (!reference) {
     return NextResponse.json(
       { error: "ゲームを検索結果から選択してください。" },
       { status: 400 }
@@ -249,66 +251,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let rawgGame: RawgGameDetail;
-
+  let game: VerifiedGame;
+  let duplicate;
   try {
-    const rawgResponse = await fetch(
-      `https://api.rawg.io/api/games/${rawgGameId}?key=${encodeURIComponent(
-        rawgApiKey
-      )}`,
-      {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-        },
-      }
-    );
-
-    if (!rawgResponse.ok) {
-      return NextResponse.json(
-        { error: "選択されたゲームを確認できませんでした。" },
-        { status: 400 }
-      );
+    const verified = await verifyGame(reference, supabase);
+    if (!verified) {
+      return NextResponse.json({ error: "選択されたゲームを確認できませんでした。" }, { status: 400 });
     }
-
-    const data = (await rawgResponse.json()) as RawgGameDetail;
-
-    if (
-      data.id !== rawgGameId ||
-      typeof data.name !== "string" ||
-      !data.name.trim()
-    ) {
-      return NextResponse.json(
-        { error: "選択されたゲームを確認できませんでした。" },
-        { status: 400 }
-      );
-    }
-
-    rawgGame = data;
+    game = verified;
+    duplicate = await findDuplicateBgm(supabase, game, normalizedTitle);
   } catch (error) {
-    console.error("RAWGゲーム確認エラー:", error);
-
-    return NextResponse.json(
-      { error: "ゲーム情報の確認に失敗しました。" },
-      { status: 502 }
-    );
-  }
-
-  const { data: duplicate, error: duplicateError } =
-    await supabase
-      .from("bgms")
-      .select("id, title")
-      .eq("rawg_game_id", rawgGameId)
-      .eq("normalized_title", normalizedTitle)
-      .maybeSingle();
-
-  if (duplicateError) {
-    console.error("重複確認エラー:", duplicateError);
-
-    return NextResponse.json(
-      { error: "BGMの確認に失敗しました。" },
-      { status: 500 }
-    );
+    console.error("ゲーム確認エラー:", error);
+    return NextResponse.json({ error: "ゲーム情報の確認に失敗しました。" }, { status: 502 });
   }
 
   if (duplicate) {
@@ -325,10 +279,8 @@ export async function POST(request: NextRequest) {
     .from("bgms")
     .insert({
       title,
-      game_title: rawgGame.name.trim(),
+      ...gameColumns(game),
       composer: composer || null,
-      image_url: rawgGame.background_image ?? null,
-      rawg_game_id: rawgGameId,
       normalized_title: normalizedTitle,
       is_hidden: false,
     })
@@ -358,4 +310,55 @@ export async function POST(request: NextRequest) {
     { bgm: data },
     { status: 201 }
   );
+}
+
+export async function PATCH(request: NextRequest) {
+  const supabase = getServerSupabase();
+  if (!supabase) return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+  const bearer = request.headers.get("authorization")?.match(/^Bearer (.+)$/i)?.[1];
+  if (!bearer) return NextResponse.json({ error: "管理者ログインが必要です。" }, { status: 401 });
+  const { data: auth, error: authError } = await supabase.auth.getUser(bearer);
+  if (authError || !auth.user || !process.env.NEXT_PUBLIC_ADMIN_USER_ID || auth.user.id !== process.env.NEXT_PUBLIC_ADMIN_USER_ID) {
+    return NextResponse.json({ error: "管理者権限がありません。" }, { status: 403 });
+  }
+  let payload: Record<string, unknown>;
+  try {
+    const body = await request.json();
+    if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("Invalid JSON");
+    payload = body;
+  } catch {
+    return NextResponse.json({ error: "送信データが正しくありません。" }, { status: 400 });
+  }
+  const reference = parseGameReference(payload);
+  const id = payload.bgm_id;
+  if (typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0 || !reference) {
+    return NextResponse.json({ error: "BGMとゲームを選択してください。" }, { status: 400 });
+  }
+  const { data: existing, error: readError } = await supabase.from("bgms").select("*").eq("id", id).maybeSingle();
+  if (readError) return NextResponse.json({ error: "BGMを取得できませんでした。" }, { status: 500 });
+  if (!existing) return NextResponse.json({ error: "BGMが見つかりません。" }, { status: 404 });
+  try {
+    const game = await verifyGame(reference, supabase);
+    if (!game) return NextResponse.json({ error: "選択されたゲームを確認できませんでした。" }, { status: 400 });
+    const normalizedTitle = normalizeBgmTitle(existing.title);
+    const duplicate = await findDuplicateBgm(supabase, game, normalizedTitle, id);
+    if (duplicate) return NextResponse.json({ error: "同じゲームに同じBGMがすでに登録されています。", code: "DUPLICATE_BGM" }, { status: 409 });
+    const columns = gameColumns(game);
+    // Re-selecting the same IGDB game retains its existing explicit RAWG association.
+    if (existing.igdb_game_id && existing.igdb_game_id === game.igdb_game_id) {
+      columns.rawg_game_id ??= existing.rawg_game_id;
+    }
+    const { data, error } = await supabase.from("bgms").update({
+      ...columns, image_url: game.image_url ?? existing.image_url, normalized_title: normalizedTitle,
+    }).eq("id", id).select().single();
+    if (error) {
+      if (error.code === "23505") return NextResponse.json({ error: "同じゲームに同じBGMがすでに登録されています。", code: "DUPLICATE_BGM" }, { status: 409 });
+      console.error("ゲーム情報更新エラー:", error);
+      return NextResponse.json({ error: "ゲーム情報の保存に失敗しました。" }, { status: 500 });
+    }
+    return NextResponse.json({ bgm: data });
+  } catch (error) {
+    console.error("ゲーム情報確認エラー:", error);
+    return NextResponse.json({ error: "ゲーム情報の確認に失敗しました。" }, { status: 502 });
+  }
 }

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/game-search.test.cjs",
+    "test:fixture": "node tests/start-fixture.cjs",
+    "test:localhost": "node --test tests/localhost.test.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -7,12 +7,12 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-[#f5f8fc] text-slate-900">
       <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <a
+        <Link
           href="/"
           className="text-sm font-semibold text-sky-600 transition hover:text-sky-700"
         >
           ← My 9 BGMに戻る
-        </a>
+        </Link>
 
         <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-6 py-8 sm:px-10 sm:py-10">
@@ -21,14 +21,14 @@ export default function AboutPage() {
             </p>
 
             <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              あなたを構成する、
+              あなたを彩る、
               <br className="sm:hidden" />
-              9つのゲームBGM。
+              9つのゲームBGM
             </h1>
 
             <p className="mt-5 leading-7 text-slate-600">
               My 9 BGMは、これまで遊んできたゲームの中から
-              「自分を構成する9曲」を選び、3×3のMY 9として共有できるサービスです。
+              「自分を彩る9曲」を選び、3×3のMY 9として共有できるサービスです。
             </p>
           </div>
 
@@ -72,12 +72,12 @@ export default function AboutPage() {
               </p>
 
               <div className="mt-5">
-                <a
+                <Link
                   href="/"
                   className="inline-flex rounded-xl bg-sky-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-600"
                 >
                   EditorでBGMを探す
-                </a>
+                </Link>
               </div>
             </section>
 
@@ -93,21 +93,21 @@ export default function AboutPage() {
             <section>
               <h2 className="text-xl font-bold">ゲーム情報・画像について</h2>
               <p className="mt-3 leading-7 text-slate-600">
-                ゲーム情報や画像の一部にはRAWGが提供するデータを利用しています。
+                ゲーム情報や画像の一部にはRAWGおよびIGDBが提供するデータを利用しています。
                 各ゲーム、楽曲、画像その他の権利は、それぞれの権利者に帰属します。
               </p>
             </section>
 
             <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 pt-7 text-sm text-slate-500">
-              <a href="/terms" className="hover:text-slate-900">
+              <Link href="/terms" className="hover:text-slate-900">
                 利用規約
-              </a>
-              <a href="/privacy" className="hover:text-slate-900">
+              </Link>
+              <Link href="/privacy" className="hover:text-slate-900">
                 プライバシーポリシー
-              </a>
-              <a href="/community" className="hover:text-slate-900">
+              </Link>
+              <Link href="/community" className="hover:text-slate-900">
                 みんなの9つのBGM
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -115,3 +115,4 @@ export default function AboutPage() {
     </main>
   );
 }
+import Link from "next/link";
