@@ -113,7 +113,7 @@ function SortableBgm({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex h-[74px] items-center gap-3 rounded-2xl border bg-white px-3 shadow-sm ${
+      className={`flex h-[74px] w-full min-w-0 items-center gap-2 rounded-2xl border bg-white px-2.5 shadow-sm sm:gap-3 sm:px-3 ${
         isDragging
           ? "border-sky-400 shadow-lg"
           : "border-slate-200"
@@ -124,29 +124,29 @@ function SortableBgm({
           type="button"
           {...attributes}
           {...listeners}
-          className="flex h-10 w-7 cursor-grab touch-none items-center justify-center text-xl text-slate-300 hover:text-slate-600 active:cursor-grabbing"
+          className="flex h-9 w-6 flex-none cursor-grab touch-none items-center justify-center text-lg text-slate-300 hover:text-slate-600 active:cursor-grabbing sm:h-10 sm:w-7 sm:text-xl"
           title="ドラッグして並べ替え"
         >
           ⋮⋮
         </button>
       )}
 
-      <span className="w-6 text-center text-xl font-bold text-sky-500">
+      <span className="w-5 flex-none text-center text-base font-bold text-sky-500 sm:w-6 sm:text-xl">
         {index + 1}
       </span>
 
       <img
         src={getImageUrl(bgm, "100x100")}
         alt={bgm.title}
-        className="h-12 w-12 flex-none rounded-lg object-cover"
+        className="h-10 w-10 flex-none rounded-lg object-cover sm:h-12 sm:w-12"
       />
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold">
+        <p className="truncate text-sm font-semibold sm:text-base">
           {bgm.title}
         </p>
 
-        <p className="truncate text-xs text-slate-500">
+        <p className="truncate text-[11px] text-slate-500 sm:text-xs">
           {bgm.game_title}
         </p>
       </div>
@@ -155,7 +155,7 @@ function SortableBgm({
         <button
           type="button"
           onClick={() => removeBgm(bgm.id)}
-          className="flex h-9 w-9 items-center justify-center text-xl text-slate-400 transition hover:text-red-500"
+          className="flex h-8 w-8 flex-none items-center justify-center text-lg text-slate-400 transition hover:text-red-500 sm:h-9 sm:w-9 sm:text-xl"
         >
           ×
         </button>
@@ -2186,14 +2186,14 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f8fc] text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-16 max-w-[1400px] items-center justify-between gap-4 px-6">
+    <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#f5f8fc] text-slate-900">
+      <header className="w-full border-b border-slate-200 bg-white">
+        <div className="mx-auto flex min-h-16 w-full max-w-[1400px] items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
           <div className="flex items-center gap-10">
             <button
               type="button"
               onClick={returnToMyEditor}
-              className="whitespace-nowrap font-bold tracking-[0.2em]"
+              className="whitespace-nowrap text-sm font-bold tracking-[0.18em] sm:text-base sm:tracking-[0.2em]"
             >
               🎧 MY 9 BGM
             </button>
@@ -2228,9 +2228,12 @@ export default function Home() {
                 BGMを追加
               </button>
 
-              <span className="cursor-pointer py-5 text-slate-500 hover:text-slate-900">
+              <a
+                href="/about"
+                className="py-5 text-slate-500 hover:text-slate-900"
+              >
                 このサイトについて
-              </span>
+              </a>
             </nav>
           </div>
 
@@ -2265,7 +2268,7 @@ export default function Home() {
                   onClick={
                     handleAdminLogout
                   }
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 sm:px-4 sm:text-sm sm:text-slate-600"
                 >
                   ログアウト
                 </button>
@@ -2286,6 +2289,42 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        <nav className="grid w-full grid-cols-4 border-t border-slate-100 bg-white text-[11px] font-semibold md:hidden">
+          <button
+            type="button"
+            onClick={returnToMyEditor}
+            className={`min-w-0 px-1 py-3 text-center ${
+              !isViewingSharedSet
+                ? "border-b-2 border-sky-500 text-slate-900"
+                : "text-slate-500"
+            }`}
+          >
+            Editor
+          </button>
+
+          <a
+            href="/community"
+            className="min-w-0 px-1 py-3 text-center text-slate-500"
+          >
+            みんなのBGM
+          </a>
+
+          <button
+            type="button"
+            onClick={() => setShowAddForm(true)}
+            className="min-w-0 px-1 py-3 text-center text-slate-500"
+          >
+            BGMを追加
+          </button>
+
+          <a
+            href="/about"
+            className="min-w-0 px-1 py-3 text-center text-slate-500"
+          >
+            このサイト
+          </a>
+        </nav>
       </header>
 
       {isAdmin && (
@@ -2321,20 +2360,20 @@ export default function Home() {
         </div>
       )}
 
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
-        <div className="mb-9">
-          <p className="mb-2 text-sm font-bold tracking-[0.25em] text-sky-500">
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 sm:py-10">
+        <div className="mb-7 sm:mb-9">
+          <p className="mb-2 text-xs font-bold tracking-[0.25em] text-sky-500 sm:text-sm">
             MY 9 GAME BGM
           </p>
 
-          <h1 className="text-4xl font-bold">
+          <h1 className="text-2xl font-bold leading-tight sm:text-4xl">
             {isViewingSharedSet
               ? sharedSet.title ||
                 "共有された9つのゲームBGM"
               : "私を構成する9つのゲームBGM"}
           </h1>
 
-          <p className="mt-3 text-slate-500">
+          <p className="mt-3 text-sm text-slate-500 sm:text-base">
             {isViewingSharedSet
               ? "誰かが選んだ、忘れられない9つのゲームBGM。"
               : "ゲームの中で出会った、忘れられない9つの音を選ぼう。"}
@@ -2347,8 +2386,8 @@ export default function Home() {
           </div>
         )}
 
-        <div className="grid gap-10 lg:grid-cols-[1fr_520px]">
-          <section>
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_520px] lg:gap-10">
+          <section className="min-w-0">
             <input
               type="text"
               placeholder="BGM名・ゲーム名・作曲者で検索..."
@@ -2358,7 +2397,7 @@ export default function Home() {
                   e.target.value
                 )
               }
-              className="mb-6 h-[52px] w-full rounded-2xl border border-slate-200 bg-white px-5 shadow-sm outline-none focus:border-sky-400"
+              className="mb-6 h-[52px] w-full max-w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none focus:border-sky-400 sm:px-5 sm:text-base"
             />
 
             {loading ? (
@@ -2370,7 +2409,7 @@ export default function Home() {
                 BGMが見つかりませんでした
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <div className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
                 {filtered.map(
                   (bgm) => {
                     const alreadySelected =
@@ -2383,7 +2422,7 @@ export default function Home() {
                     return (
                       <div
                         key={bgm.id}
-                        className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                        className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                       >
                         <div className="relative aspect-square">
                           <img
@@ -2419,12 +2458,12 @@ export default function Home() {
                             )}
                         </div>
 
-                        <div className="p-4">
-                          <p className="truncate font-bold">
+                        <div className="min-w-0 p-3 sm:p-4">
+                          <p className="truncate text-sm font-bold sm:text-base">
                             {bgm.title}
                           </p>
 
-                          <p className="mt-1 truncate text-sm text-slate-500">
+                          <p className="mt-1 truncate text-xs text-slate-500 sm:text-sm">
                             {bgm.game_title}
                           </p>
 
@@ -2439,7 +2478,7 @@ export default function Home() {
                             onClick={() =>
                               openReportModal(bgm)
                             }
-                            className="mt-3 text-xs font-semibold text-slate-400 transition hover:text-amber-600"
+                            className="mt-3 text-[11px] font-semibold text-slate-400 transition hover:text-amber-600 sm:text-xs"
                           >
                             ⚠ このBGMを通報
                           </button>
@@ -2546,10 +2585,10 @@ export default function Home() {
             )}
           </section>
 
-          <section>
-            <div className="sticky top-8">
+          <section className="min-w-0">
+            <div className="sticky top-8 w-full min-w-0">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-bold tracking-[0.18em]">
+                <h2 className="min-w-0 text-sm font-bold tracking-[0.14em] sm:text-base sm:tracking-[0.18em]">
                   SELECTED BGM ·{" "}
                   {selected.length} / 9
                 </h2>
@@ -2623,13 +2662,13 @@ export default function Home() {
                         return (
                           <div
                             key={`empty-${index}`}
-                            className="flex h-[74px] items-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-5"
+                            className="flex h-[74px] w-full min-w-0 items-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-3 sm:px-5"
                           >
-                            <span className="text-xl font-bold text-slate-300">
+                            <span className="text-lg font-bold text-slate-300 sm:text-xl">
                               {index + 1}
                             </span>
 
-                            <span className="ml-5 text-sm text-slate-400">
+                            <span className="ml-3 text-sm text-slate-400 sm:ml-5">
                               BGMを選択
                             </span>
                           </div>
@@ -2649,7 +2688,7 @@ export default function Home() {
                   selected.length !== 9 ||
                   generatingImage
                 }
-                className="mt-5 w-full rounded-2xl bg-slate-900 py-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-30"
+                className="mt-5 w-full max-w-full rounded-2xl bg-slate-900 px-3 py-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
               >
                 {generatingImage
                   ? "画像を作成しています..."
@@ -2665,7 +2704,7 @@ export default function Home() {
                   disabled={
                     selected.length !== 9
                   }
-                  className="mt-3 w-full rounded-2xl bg-sky-500 py-4 font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="mt-3 w-full max-w-full rounded-2xl bg-sky-500 px-3 py-4 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
                 >
                   🌐 みんなに公開する
                 </button>
@@ -2677,7 +2716,7 @@ export default function Home() {
                   onClick={
                     returnToMyEditor
                   }
-                  className="mt-3 w-full rounded-2xl border border-slate-200 bg-white py-4 font-bold text-slate-700 hover:bg-slate-50"
+                  className="mt-3 w-full max-w-full rounded-2xl border border-slate-200 bg-white px-3 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 sm:text-base"
                 >
                   自分の9曲を作る
                 </button>
@@ -3021,7 +3060,7 @@ export default function Home() {
                             )}
 
                             <div className="min-w-0">
-                              <p className="truncate font-semibold">
+                              <p className="truncate text-sm font-semibold sm:text-base">
                                 {
                                   game.name
                                 }
@@ -3288,7 +3327,7 @@ export default function Home() {
                             )}
 
                             <div className="min-w-0">
-                              <p className="truncate font-semibold">
+                              <p className="truncate text-sm font-semibold sm:text-base">
                                 {
                                   game.name
                                 }
@@ -3922,17 +3961,17 @@ export default function Home() {
           </div>
         )}
 
-      <footer className="mx-auto max-w-[1400px] px-6 pb-8 pt-6 text-center text-xs text-slate-400">
+      <footer className="mx-auto w-full max-w-[1400px] px-4 pb-8 pt-6 text-center text-xs text-slate-400 sm:px-6">
         <div className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
           <a
             href="/terms"
-            className="underline underline-offset-4 hover:text-slate-600"
+            className="transition hover:text-slate-600"
           >
             利用規約
           </a>
           <a
             href="/privacy"
-            className="underline underline-offset-4 hover:text-slate-600"
+            className="transition hover:text-slate-600"
           >
             プライバシーポリシー
           </a>
