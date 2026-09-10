@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import NextImage from "next/image";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
@@ -135,9 +136,12 @@ function SortableBgm({
         {index + 1}
       </span>
 
-      <img
+      <NextImage
         src={getImageUrl(bgm, "100x100")}
         alt={bgm.title}
+        width={48}
+        height={48}
+        sizes="(max-width: 640px) 40px, 48px"
         className="h-10 w-10 flex-none rounded-lg object-cover sm:h-12 sm:w-12"
       />
 
@@ -2425,13 +2429,15 @@ export default function Home() {
                         className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                       >
                         <div className="relative aspect-square">
-                          <img
+                          <NextImage
                             src={getImageUrl(
                               bgm,
                               "600x600"
                             )}
                             alt={bgm.title}
-                            className="h-full w-full object-cover"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
+                            className="object-cover"
                           />
 
                           {!isViewingSharedSet && (
