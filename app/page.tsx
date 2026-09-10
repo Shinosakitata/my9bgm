@@ -3923,15 +3923,32 @@ export default function Home() {
         )}
 
       <footer className="mx-auto max-w-[1400px] px-6 pb-8 pt-6 text-center text-xs text-slate-400">
-        Game data and images provided by{" "}
-        <a
-          href="https://rawg.io/"
-          target="_blank"
-          rel="noreferrer"
-          className="underline hover:text-slate-600"
-        >
-          RAWG
-        </a>
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <a
+            href="/terms"
+            className="underline underline-offset-4 hover:text-slate-600"
+          >
+            利用規約
+          </a>
+          <a
+            href="/privacy"
+            className="underline underline-offset-4 hover:text-slate-600"
+          >
+            プライバシーポリシー
+          </a>
+        </div>
+
+        <p>
+          Game data and images provided by{" "}
+          <a
+            href="https://rawg.io/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline hover:text-slate-600"
+          >
+            RAWG
+          </a>
+        </p>
       </footer>
     </main>
   );
