@@ -27,8 +27,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (url.hostname === "media.rawg.io" && url.pathname.startsWith("/media/") && !url.pathname.startsWith("/media/resize/")) {
+      url.pathname = url.pathname.replace("/media/", "/media/resize/640/-/");
+    }
+
     const response = await fetch(url.toString(), {
       redirect: "error",
+      next: { revalidate: 86400 },
       signal: AbortSignal.timeout(10000),
     });
 

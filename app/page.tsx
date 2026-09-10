@@ -1824,6 +1824,30 @@ export default function Home() {
         canvas.height
       );
 
+      const loadedImages = await Promise.all(
+        selected.map(async (bgm) => {
+          if (!bgm.image_url) return null;
+
+          try {
+            const proxyUrl =
+              `/api/image-proxy?url=${encodeURIComponent(
+                bgm.image_url
+              )}`;
+
+            return await loadCanvasImage(
+              proxyUrl
+            );
+          } catch (error) {
+            console.error(
+              "画像読み込み失敗:",
+              error
+            );
+
+            return null;
+          }
+        })
+      );
+
       for (
         let index = 0;
         index < 9;
@@ -1846,42 +1870,18 @@ export default function Home() {
         const y =
           row * tileSize;
 
-        if (bgm.image_url) {
-          try {
-            const proxyUrl =
-              `/api/image-proxy?url=${encodeURIComponent(
-                bgm.image_url
-              )}`;
+        const image =
+          loadedImages[index];
 
-            const image =
-              await loadCanvasImage(
-                proxyUrl
-              );
-
-            drawImageCover(
-              ctx,
-              image,
-              x,
-              y,
-              tileSize,
-              tileSize
-            );
-          } catch (error) {
-            console.error(
-              "画像描画失敗:",
-              error
-            );
-
-            ctx.fillStyle =
-              "#334155";
-
-            ctx.fillRect(
-              x,
-              y,
-              tileSize,
-              tileSize
-            );
-          }
+        if (image) {
+          drawImageCover(
+            ctx,
+            image,
+            x,
+            y,
+            tileSize,
+            tileSize
+          );
         } else {
           ctx.fillStyle =
             "#334155";

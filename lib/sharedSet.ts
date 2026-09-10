@@ -27,7 +27,7 @@ export async function getSharedSet(shareId: string): Promise<SharedSet | null> {
   const headers = { apikey: key, Authorization: `Bearer ${key}` };
   const setResponse = await fetch(
     `${url}/rest/v1/bgm_sets?share_id=eq.${encodeURIComponent(shareId)}&select=share_id,title,creator_name,bgm_ids&limit=1`,
-    { headers, cache: "no-store", signal: AbortSignal.timeout(5000) },
+    { headers, next: { revalidate: 86400 }, signal: AbortSignal.timeout(5000) },
   );
   if (!setResponse.ok) return null;
 
@@ -39,7 +39,7 @@ export async function getSharedSet(shareId: string): Promise<SharedSet | null> {
   if (ids.length !== 9) return null;
   const bgmResponse = await fetch(
     `${url}/rest/v1/bgms?id=in.(${ids.join(",")})&select=id,title,game_title,image_url`,
-    { headers, cache: "no-store", signal: AbortSignal.timeout(5000) },
+    { headers, next: { revalidate: 86400 }, signal: AbortSignal.timeout(5000) },
   );
   if (!bgmResponse.ok) return null;
 

@@ -17,7 +17,10 @@ async function imageSource(url: string | null, index: number) {
   try {
     const parsed = new URL(normalizedUrl);
     if (!["media.rawg.io", "api.rawg.io", "images.igdb.com"].includes(parsed.hostname)) return fallbackImage(index);
-    const response = await fetch(parsed, { cache: "no-store", signal: AbortSignal.timeout(6000) });
+    if (parsed.hostname === "media.rawg.io" && parsed.pathname.startsWith("/media/") && !parsed.pathname.startsWith("/media/resize/")) {
+      parsed.pathname = parsed.pathname.replace("/media/", "/media/resize/640/-/");
+    }
+    const response = await fetch(parsed, { next: { revalidate: 604800 }, signal: AbortSignal.timeout(6000) });
     const contentType = response.headers.get("content-type")?.split(";")[0] ?? "";
     if (!response.ok || !contentType.startsWith("image/")) return fallbackImage(index);
     const bytes = await response.arrayBuffer();
@@ -42,7 +45,7 @@ export default async function Image({ params }: { params: Promise<{ shareId: str
           <div key={index} style={{ width: "400px", height: "400px", display: "flex", position: "relative", overflow: "hidden", border: "1px solid rgba(255,255,255,0.18)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={src} alt="" width="400" height="400" style={{ width: "400px", height: "400px", objectFit: "cover" }} />
-            <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(to bottom, transparent 34%, rgba(0,0,0,0.5) 56%, rgba(0,0,0,0.92) 72%, rgba(0,0,0,0.98) 100%)" }} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(to bottom, transparent 28%, rgba(0,0,0,0.62) 50%, rgba(0,0,0,0.96) 66%, #000000 100%)" }} />
             <div style={{ position: "absolute", left: "24px", right: "24px", bottom: "25px", display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", whiteSpace: "nowrap", overflow: "hidden", color: "#ffffff", fontSize: "28px", lineHeight: 1.15, fontWeight: 900 }}>{set?.bgms[index]?.title ?? ""}</div>
               <div style={{ display: "flex", marginTop: "8px", whiteSpace: "nowrap", overflow: "hidden", color: "rgba(255,255,255,0.88)", fontSize: "17px", fontWeight: 600 }}>{set?.bgms[index]?.game_title ?? ""}</div>
@@ -51,6 +54,11 @@ export default async function Image({ params }: { params: Promise<{ shareId: str
         ))}
       </div>
     </div>,
-    size,
+    {
+      ...size,
+      headers: {
+        "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      },
+    },
   );
 }
