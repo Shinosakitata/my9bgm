@@ -1,6 +1,6 @@
 export const metadata = {
   title: "利用規約",
-  description: "My 9 BGMの利用規約です。",
+  description: "My9GameMusicの利用規約です。",
 };
 
 export default function TermsPage() {
@@ -11,7 +11,7 @@ export default function TermsPage() {
           href="/"
           className="text-sm font-semibold text-sky-600 hover:text-sky-700"
         >
-          ← My 9 BGMに戻る
+          ← My9GameMusicに戻る
         </Link>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
@@ -25,7 +25,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-bold">1. はじめに</h2>
               <p className="mt-3">
-                本利用規約（以下「本規約」）は、My 9 BGM（以下「本サービス」）の利用条件を定めるものです。
+                本利用規約（以下「本規約」）は、My9GameMusic（以下「本サービス」）の利用条件を定めるものです。
                 本サービスを利用する方（以下「ユーザー」）は、本規約に同意したうえで本サービスを利用するものとします。
               </p>
             </section>
@@ -33,15 +33,15 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-bold">2. 本サービスについて</h2>
               <p className="mt-3">
-                本サービスは、好きなゲームBGMを選択して「MY 9」を作成・共有したり、
-                BGM情報を投稿したりできるサービスです。
+                本サービスは、好きなゲーム音楽を選択して「MY 9」を作成・共有したり、
+                音楽情報を投稿したりできるサービスです。
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-bold">3. BGM情報の投稿</h2>
+              <h2 className="text-xl font-bold">3. 音楽情報の投稿</h2>
               <p className="mt-3">
-                ユーザーは、本サービス上で不足しているBGM情報を投稿できます。
+                ユーザーは、本サービス上で不足している音楽情報を投稿できます。
                 投稿にあたっては、できる限り正確な曲名・ゲーム名その他の情報を入力してください。
               </p>
               <p className="mt-3">
@@ -70,7 +70,7 @@ export default function TermsPage() {
                 事前の通知なく投稿内容を修正または非表示にできるものとします。
               </p>
               <p className="mt-3">
-                ユーザーは、本サービスの通報機能を利用して問題のあるBGM情報を運営者へ知らせることができます。
+                ユーザーは、本サービスの通報機能を利用して問題のある音楽情報を運営者へ知らせることができます。
               </p>
             </section>
 

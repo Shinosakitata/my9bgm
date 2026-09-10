@@ -1,6 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/",
+        has: [
+          {
+            type: "query",
+            key: "set",
+            value: "(?<shareId>[A-Za-z0-9]{1,64})",
+          },
+        ],
+        destination: "/set/:shareId",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

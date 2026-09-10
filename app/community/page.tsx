@@ -69,7 +69,7 @@ export default function CommunityPage() {
       );
 
       setError(
-        "BGMデータの読み込みに失敗しました。"
+        "音楽データの読み込みに失敗しました。"
       );
 
       setLoading(false);
@@ -213,7 +213,7 @@ export default function CommunityPage() {
               href="/"
               className="whitespace-nowrap font-bold tracking-[0.2em]"
             >
-              🎧 MY 9 BGM
+              🎧 My9GameMusic
             </Link>
 
             <nav className="hidden gap-7 text-sm font-semibold md:flex">
@@ -225,14 +225,14 @@ export default function CommunityPage() {
               </Link>
 
               <span className="border-b-2 border-sky-500 py-5">
-                みんなの9つのBGM
+                みんなの9つの音楽
               </span>
 
               <Link
                 href="/?add=1"
                 className="py-5 text-slate-500 hover:text-slate-900"
               >
-                BGMを追加
+                音楽を追加
               </Link>
 
               <Link
@@ -260,7 +260,7 @@ export default function CommunityPage() {
           </p>
 
           <h1 className="text-4xl font-bold">
-            みんなの9つのBGM
+            みんなの9つの音楽
           </h1>
         </div>
 
@@ -273,7 +273,7 @@ export default function CommunityPage() {
                 e.target.value
               )
             }
-            placeholder="タイトル・BGM名・ゲーム名で検索..."
+            placeholder="タイトル・音楽名・ゲーム名で検索..."
             className="h-[52px] w-full rounded-2xl border border-slate-200 bg-white px-5 shadow-sm outline-none focus:border-sky-400 md:max-w-xl"
           />
 
@@ -327,7 +327,7 @@ export default function CommunityPage() {
               ({ set, bgms }) => (
                 <Link
                   key={set.id}
-                  href={`/?set=${encodeURIComponent(
+                  href={`/set/${encodeURIComponent(
                     set.share_id
                   )}`}
                   className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl"
@@ -364,12 +364,12 @@ export default function CommunityPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <p className="text-xs font-bold tracking-[0.15em] text-sky-500">
-                          MY 9 BGM
+                          My9GameMusic
                         </p>
 
                         <h2 className="mt-1 truncate text-lg font-bold">
                           {set.title ||
-                            "私を彩る9つのBGM"}
+                            "私を彩る9つのゲーム音楽"}
                         </h2>
                         <p className="mt-2 text-sm text-slate-500">作成者：{set.creator_name || "匿名"}</p>
                       </div>

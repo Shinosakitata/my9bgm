@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json({ bgms: rows });
   } catch {
-    return NextResponse.json({ error: "登録済みBGMを取得できませんでした。もう一度お試しください。" }, { status: 502 });
+    return NextResponse.json({ error: "登録済みの音楽を取得できませんでした。もう一度お試しください。" }, { status: 502 });
   }
 }
 
@@ -140,42 +140,42 @@ export async function POST(request: NextRequest) {
       : "";
 
   if (inappropriateText(rawTitle) || inappropriateText(rawComposer)) {
-    return NextResponse.json({ error: "不適切な表現が含まれています。BGM名・作曲者名を確認してください。" }, { status: 400 });
+    return NextResponse.json({ error: "不適切な表現が含まれています。音楽名・作曲者名を確認してください。" }, { status: 400 });
   }
 
   const reference = parseGameReference(payload);
 
   if (!rawTitle.trim()) {
     return NextResponse.json(
-      { error: "BGM名を入力してください。" },
+      { error: "音楽名を入力してください。" },
       { status: 400 }
     );
   }
 
   if (containsControlCharacters(rawTitle)) {
     return NextResponse.json(
-      { error: "BGM名に使用できない文字が含まれています。" },
+      { error: "音楽名に使用できない文字が含まれています。" },
       { status: 400 }
     );
   }
 
   if (containsLineBreak(rawTitle)) {
     return NextResponse.json(
-      { error: "BGM名に改行は使用できません。" },
+      { error: "音楽名に改行は使用できません。" },
       { status: 400 }
     );
   }
 
   if (containsUrl(rawTitle)) {
     return NextResponse.json(
-      { error: "BGM名にURLは入力できません。" },
+      { error: "音楽名にURLは入力できません。" },
       { status: 400 }
     );
   }
 
   if (hasExcessiveRepeatedCharacters(rawTitle)) {
     return NextResponse.json(
-      { error: "BGM名に同じ文字を連続して入力しすぎています。" },
+      { error: "音楽名に同じ文字を連続して入力しすぎています。" },
       { status: 400 }
     );
   }
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
 
   if (title.length < 1 || title.length > MAX_TITLE_LENGTH) {
     return NextResponse.json(
-      { error: `BGM名は1〜${MAX_TITLE_LENGTH}文字で入力してください。` },
+      { error: `音楽名は1〜${MAX_TITLE_LENGTH}文字で入力してください。` },
       { status: 400 }
     );
   }
@@ -239,14 +239,14 @@ export async function POST(request: NextRequest) {
 
   if (!normalizedTitle) {
     return NextResponse.json(
-      { error: "BGM名を正しく入力してください。" },
+      { error: "音楽名を正しく入力してください。" },
       { status: 400 }
     );
   }
 
   if (normalizedTitle.length > MAX_TITLE_LENGTH) {
     return NextResponse.json(
-      { error: "BGM名が長すぎます。" },
+      { error: "音楽名が長すぎます。" },
       { status: 400 }
     );
   }
@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
     if (error.code === "23505") {
       return NextResponse.json(
         {
-          error: "このBGMはすでに登録されています。",
+          error: "この音楽はすでに登録されています。",
           code: "DUPLICATE_BGM",
         },
         { status: 409 }
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "BGMの追加に失敗しました。" },
+      { error: "音楽の追加に失敗しました。" },
       { status: 500 }
     );
   }
@@ -332,17 +332,17 @@ export async function PATCH(request: NextRequest) {
   const reference = parseGameReference(payload);
   const id = payload.bgm_id;
   if (typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0 || !reference) {
-    return NextResponse.json({ error: "BGMとゲームを選択してください。" }, { status: 400 });
+    return NextResponse.json({ error: "音楽とゲームを選択してください。" }, { status: 400 });
   }
   const { data: existing, error: readError } = await supabase.from("bgms").select("*").eq("id", id).maybeSingle();
-  if (readError) return NextResponse.json({ error: "BGMを取得できませんでした。" }, { status: 500 });
-  if (!existing) return NextResponse.json({ error: "BGMが見つかりません。" }, { status: 404 });
+  if (readError) return NextResponse.json({ error: "音楽を取得できませんでした。" }, { status: 500 });
+  if (!existing) return NextResponse.json({ error: "音楽が見つかりません。" }, { status: 404 });
   try {
     const game = await verifyGame(reference, supabase);
     if (!game) return NextResponse.json({ error: "選択されたゲームを確認できませんでした。" }, { status: 400 });
     const normalizedTitle = normalizeBgmTitle(existing.title);
     const duplicate = await findDuplicateBgm(supabase, game, normalizedTitle, id);
-    if (duplicate) return NextResponse.json({ error: "同じゲームに同じBGMがすでに登録されています。", code: "DUPLICATE_BGM" }, { status: 409 });
+    if (duplicate) return NextResponse.json({ error: "同じゲームに同じ音楽がすでに登録されています。", code: "DUPLICATE_BGM" }, { status: 409 });
     const columns = gameColumns(game);
     // Re-selecting the same IGDB game retains its existing explicit RAWG association.
     if (existing.igdb_game_id && existing.igdb_game_id === game.igdb_game_id) {
@@ -352,7 +352,7 @@ export async function PATCH(request: NextRequest) {
       ...columns, image_url: game.image_url ?? existing.image_url, normalized_title: normalizedTitle,
     }).eq("id", id).select().single();
     if (error) {
-      if (error.code === "23505") return NextResponse.json({ error: "同じゲームに同じBGMがすでに登録されています。", code: "DUPLICATE_BGM" }, { status: 409 });
+      if (error.code === "23505") return NextResponse.json({ error: "同じゲームに同じ音楽がすでに登録されています。", code: "DUPLICATE_BGM" }, { status: 409 });
       console.error("ゲーム情報更新エラー:", error);
       return NextResponse.json({ error: "ゲーム情報の保存に失敗しました。" }, { status: 500 });
     }

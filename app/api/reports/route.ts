@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
   if (!Number.isSafeInteger(bgmId) || bgmId <= 0) {
     return NextResponse.json(
-      { error: "通報対象のBGMが正しくありません。" },
+      { error: "通報対象の音楽が正しくありません。" },
       { status: 400 }
     );
   }
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
   if (!bgm) {
     return NextResponse.json(
-      { error: "通報対象のBGMが見つかりません。" },
+      { error: "通報対象の音楽が見つかりません。" },
       { status: 404 }
     );
   }

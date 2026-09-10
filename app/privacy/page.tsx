@@ -1,6 +1,6 @@
 export const metadata = {
   title: "プライバシーポリシー",
-  description: "My 9 BGMのプライバシーポリシーです。",
+  description: "My9GameMusicのプライバシーポリシーです。",
 };
 
 export default function PrivacyPage() {
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
           href="/"
           className="text-sm font-semibold text-sky-600 hover:text-sky-700"
         >
-          ← My 9 BGMに戻る
+          ← My9GameMusicに戻る
         </Link>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold">1. 基本方針</h2>
               <p className="mt-3">
-                My 9 BGM（以下「本サービス」）では、サービスの提供、維持、
+                My9GameMusic（以下「本サービス」）では、サービスの提供、維持、
                 セキュリティ確保および改善のために必要な範囲で情報を取り扱います。
               </p>
             </section>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
                 本サービスでは、利用状況に応じて以下の情報を取得または処理する場合があります。
               </p>
               <ul className="mt-3 list-disc space-y-2 pl-6">
-                <li>ユーザーが投稿したBGM名、ゲーム名その他の投稿情報</li>
+                <li>ユーザーが投稿した音楽名、ゲーム名その他の投稿情報</li>
                 <li>ユーザーが作成・公開したMY 9に関する情報</li>
                 <li>MY 9公開時に入力した作成者名</li>
                 <li>通報理由および通報時に入力された内容</li>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold">5. ブラウザに保存される情報</h2>
               <p className="mt-3">
-                本サービスでは、選択中のBGMなどの状態を保持するため、
+                本サービスでは、選択中の音楽などの状態を保持するため、
                 ブラウザのローカルストレージ等を利用する場合があります。
                 これらの情報は、ブラウザの設定やデータ削除操作によって削除できる場合があります。
               </p>

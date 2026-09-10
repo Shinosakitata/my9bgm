@@ -1,6 +1,6 @@
 export const metadata = {
   title: "このサイトについて",
-  description: "My 9 BGMについての紹介ページです。",
+  description: "My9GameMusicについての紹介ページです。",
 };
 
 export default function AboutPage() {
@@ -11,37 +11,37 @@ export default function AboutPage() {
           href="/"
           className="text-sm font-semibold text-sky-600 transition hover:text-sky-700"
         >
-          ← My 9 BGMに戻る
+          ← My9GameMusicに戻る
         </Link>
 
         <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-6 py-8 sm:px-10 sm:py-10">
             <p className="text-xs font-bold tracking-[0.25em] text-sky-500">
-              ABOUT MY 9 BGM
+              ABOUT MY9GMUSIC
             </p>
 
             <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               あなたを彩る、
               <br className="sm:hidden" />
-              9つのゲームBGM
+              9つのゲーム音楽
             </h1>
 
             <p className="mt-5 leading-7 text-slate-600">
-              My 9 BGMは、これまで遊んできたゲームの中から
-              「自分を彩る9曲」を選び、3×3のMY 9として共有できるサービスです。
+              My9GameMusicは、これまで遊んできたゲームの中から
+              「自分を彩る9つのゲーム音楽」を選び、3×3のMY 9として共有できるサービスです。
             </p>
           </div>
 
           <div className="space-y-10 px-6 py-8 sm:px-10 sm:py-10">
             <section>
-              <h2 className="text-xl font-bold">My 9 BGMでできること</h2>
+              <h2 className="text-xl font-bold">My9GameMusicでできること</h2>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-3">
                 <div className="rounded-2xl bg-slate-50 p-5">
                   <p className="text-2xl">🎧</p>
                   <h3 className="mt-3 font-bold">9曲を選ぶ</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    登録されているゲームBGMから、自分の好きな9曲を選べます。
+                    登録されているゲーム音楽から、自分の好きな9曲を選べます。
                   </p>
                 </div>
 
@@ -64,11 +64,11 @@ export default function AboutPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold">聴きたいBGMが見つからないとき</h2>
+              <h2 className="text-xl font-bold">聴きたい音楽が見つからないとき</h2>
               <p className="mt-3 leading-7 text-slate-600">
-                My 9 BGMのデータベースは、ユーザーからのBGM追加によって少しずつ増えていきます。
+                My9GameMusicのデータベースは、ユーザーからの音楽追加によって少しずつ増えていきます。
                 探している曲がまだ登録されていない場合は、上部メニューの
-                「BGMを追加」から登録できます。
+                「音楽を追加」から登録できます。
               </p>
 
               <div className="mt-5">
@@ -76,7 +76,7 @@ export default function AboutPage() {
                   href="/"
                   className="inline-flex rounded-xl bg-sky-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-600"
                 >
-                  EditorでBGMを探す
+                  Editorで音楽を探す
                 </Link>
               </div>
             </section>
@@ -84,8 +84,8 @@ export default function AboutPage() {
             <section>
               <h2 className="text-xl font-bold">投稿データについて</h2>
               <p className="mt-3 leading-7 text-slate-600">
-                ユーザーが追加したBGMには、表記揺れ、重複、誤情報などが含まれる可能性があります。
-                問題のある情報を見つけた場合は、各BGMの通報機能から知らせることができます。
+                ユーザーが追加した音楽には、表記揺れ、重複、誤情報などが含まれる可能性があります。
+                問題のある情報を見つけた場合は、各音楽の通報機能から知らせることができます。
                 運営側で確認し、必要に応じて修正または非表示にします。
               </p>
             </section>
@@ -106,7 +106,7 @@ export default function AboutPage() {
                 プライバシーポリシー
               </Link>
               <Link href="/community" className="hover:text-slate-900">
-                みんなの9つのBGM
+                みんなの9つの音楽
               </Link>
             </div>
           </div>

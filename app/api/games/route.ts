@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
   }
   let results = collapseLogicalGames(rankGames(mappedLocalGames, remoteGames, query), logicalCatalog.games, logicalCatalog.mappings)
     .sort((a, b) => Number(!exactLogicalIds.has(a.game_id ?? -1)) - Number(!exactLogicalIds.has(b.game_id ?? -1)));
-  // An exact alias identifies the My9BGM logical game. Once found, omit the
+  // An exact alias identifies the My9GameMusic logical game. Once found, omit the
   // individual provider records and incidental partial matches from the list.
   if (exactLogicalIds.size > 0) {
     results = results.filter(result => result.game_id != null && exactLogicalIds.has(result.game_id));

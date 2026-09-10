@@ -9,24 +9,24 @@ const siteUrl = "https://my9bgm.vercel.app";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "My 9 BGM",
-    template: "%s | My 9 BGM",
+    default: "My9GameMusic",
+    template: "%s | My9GameMusic",
   },
   description:
-    "あなたの好きなゲームBGMを9曲選んで、3×3のMY 9として共有できるサービスです。",
-  applicationName: "My 9 BGM",
+    "好きなゲーム音楽を9曲選んで、あなただけの一枚を作ろう。",
+  applicationName: "My9GameMusic",
   keywords: [
-    "My 9 BGM",
-    "ゲームBGM",
+    "My9GameMusic",
     "ゲーム音楽",
-    "BGM",
+    "ゲーム音楽",
+    "音楽",
     "ゲーム",
     "音楽",
     "MY9",
   ],
-  authors: [{ name: "My 9 BGM" }],
-  creator: "My 9 BGM",
-  publisher: "My 9 BGM",
+  authors: [{ name: "My9GameMusic" }],
+  creator: "My9GameMusic",
+  publisher: "My9GameMusic",
   alternates: {
     canonical: "/",
   },
@@ -34,16 +34,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     url: siteUrl,
-    siteName: "My 9 BGM",
-    title: "My 9 BGM",
+    siteName: "My9GameMusic",
+    title: "私を彩る9つのゲーム音楽 | My9GameMusic",
     description:
-      "あなたの好きなゲームBGMを9曲選んで、3×3のMY 9として共有しよう。",
+      "好きなゲーム音楽を9曲選んで、あなただけの一枚を作ろう。",
   },
   twitter: {
     card: "summary_large_image",
-    title: "My 9 BGM",
+    title: "私を彩る9つのゲーム音楽 | My9GameMusic",
     description:
-      "あなたの好きなゲームBGMを9曲選んで、3×3のMY 9として共有しよう。",
+      "好きなゲーム音楽を9曲選んで、あなただけの一枚を作ろう。",
   },
   robots: {
     index: true,

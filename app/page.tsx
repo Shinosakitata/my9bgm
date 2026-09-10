@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import NextImage from "next/image";
+import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { matchesSearch, type GameSearchResult } from "../lib/gameSearch";
@@ -187,6 +188,7 @@ function SortableBgm({
 }
 
 export default function Home() {
+  const router = useRouter();
   const [bgms, setBgms] = useState<Bgm[]>([]);
   const [selected, setSelected] = useState<Bgm[]>([]);
   const [comments, setComments] = useState<Record<number, string>>({});
@@ -507,7 +509,10 @@ export default function Home() {
       );
 
     const shareId =
-      params.get("set");
+      params.get("set") ||
+      (window.location.pathname.startsWith("/set/")
+        ? decodeURIComponent(window.location.pathname.split("/")[2] ?? "")
+        : "");
 
     if (shareId) {
       const loaded =
@@ -585,7 +590,7 @@ export default function Home() {
 
     if (restored.length !== 9) {
       setSharedSetError(
-        "共有セットの一部のBGMが見つかりませんでした。"
+        "共有セットの一部の音楽が見つかりませんでした。"
       );
 
       return false;
@@ -783,13 +788,13 @@ export default function Home() {
     fetch(`/api/bgms?igdb_game_id=${chosenGame.id}${chosenGame.game_id ? `&game_id=${chosenGame.game_id}` : ""}`, { signal: controller.signal })
       .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error); return data; })
       .then(data => { if (!controller.signal.aborted) { setGameBgms(data.bgms); setGameListStatus(""); setGameListReady(true); } })
-      .catch(error => { if (!controller.signal.aborted) setGameListStatus(error.message || "BGMの取得に失敗しました。"); });
+      .catch(error => { if (!controller.signal.aborted) setGameListStatus(error.message || "音楽の取得に失敗しました。"); });
     return () => controller.abort();
   }, [chosenGame]);
 
   function chooseGame(game: GameSearchResult) {
     setChosenGame(game); setGameBgms([]); setGameListReady(false);
-    setGameListStatus("登録済みBGMを読み込んでいます...");
+    setGameListStatus("登録済みの音楽を読み込んでいます...");
     selectGameForNewBgm(game); setConfirmedTitle("");
   }
 
@@ -823,7 +828,7 @@ export default function Home() {
       selected.length >= 9
     ) {
       alert(
-        "選べるBGMは9曲までです"
+        "選べる音楽は9曲までです"
       );
 
       return;
@@ -1036,7 +1041,7 @@ export default function Home() {
       }
 
       const url =
-        `${window.location.origin}/?set=${result.share_id}`;
+        `${window.location.origin}/set/${result.share_id}`;
 
       setPublishedUrl(url);
     } catch (error) {
@@ -1083,8 +1088,8 @@ export default function Home() {
   function sharePublishedSetOnX() {
     if (!publishedUrl) return;
     const text = [
-      "私を彩る9つのBGM",
-      "#My9BGM #私を彩る9つのBGM",
+      "私を彩る9つのゲーム音楽",
+      "#My9GameMusic #私を彩る9つのゲーム音楽",
       publishedUrl,
     ].join("\n");
     window.open(
@@ -1095,9 +1100,7 @@ export default function Home() {
   }
 
   function returnToMyEditor() {
-    window.location.href =
-      window.location.origin +
-      window.location.pathname;
+    router.push("/");
   }
 
   // =========================
@@ -1176,7 +1179,7 @@ export default function Home() {
 
     if (!title) {
       setAddMessage(
-        "BGM名を入力してください。"
+        "音楽名を入力してください。"
       );
       return;
     }
@@ -1193,7 +1196,7 @@ export default function Home() {
 
     if (!normalizedTitle) {
       setAddMessage(
-        "BGM名を正しく入力してください。"
+        "音楽名を正しく入力してください。"
       );
       return;
     }
@@ -1249,7 +1252,7 @@ export default function Home() {
         setAddMessage(
           typeof result?.error === "string"
             ? result.error
-            : "BGMの追加に失敗しました。"
+            : "音楽の追加に失敗しました。"
         );
         return;
       }
@@ -1260,7 +1263,7 @@ export default function Home() {
 
       if (!addedBgm) {
         setAddMessage(
-          "BGMの追加結果を取得できませんでした。"
+          "音楽の追加結果を取得できませんでした。"
         );
         return;
       }
@@ -1271,7 +1274,7 @@ export default function Home() {
       ]);
 
       setGameBgms(current => [...current, addedBgm]);
-      setAddMessage("BGMを追加しました！");
+      setAddMessage("音楽を追加しました！");
       setConfirmedTitle("");
 
       setTimeout(() => {
@@ -1284,7 +1287,7 @@ export default function Home() {
       );
 
       setAddMessage(
-        "BGMの追加に失敗しました。通信状態を確認してください。"
+        "音楽の追加に失敗しました。通信状態を確認してください。"
       );
     } finally {
       setAdding(false);
@@ -1523,7 +1526,7 @@ export default function Home() {
     const labels: Record<string, string> = {
       duplicate: "重複している",
       not_exist: "存在しない曲",
-      wrong_title: "BGM名が間違っている",
+      wrong_title: "音楽名が間違っている",
       wrong_game: "ゲームが間違っている",
       inappropriate: "不適切な内容",
       other: "その他",
@@ -1547,7 +1550,7 @@ export default function Home() {
 
     if (!target) {
       setAdminReportsError(
-        "対象BGMが見つかりません。"
+        "対象の音楽が見つかりません。"
       );
       return;
     }
@@ -1561,7 +1564,7 @@ export default function Home() {
 
     if (!target) {
       setAdminReportsError(
-        "対象BGMが見つかりません。"
+        "対象の音楽が見つかりません。"
       );
       return;
     }
@@ -1646,7 +1649,7 @@ export default function Home() {
 
     if (error) {
       console.error("BGM再表示エラー:", error);
-      alert("BGMの再表示に失敗しました。");
+      alert("音楽の再表示に失敗しました。");
       return;
     }
 
@@ -2023,7 +2026,7 @@ export default function Home() {
         "bold 22px sans-serif";
 
       ctx.fillText(
-        "MY 9 BGM",
+        "My9GameMusic",
         1765,
         1765
       );
@@ -2093,7 +2096,7 @@ export default function Home() {
               onClick={returnToMyEditor}
               className="whitespace-nowrap text-sm font-bold tracking-[0.18em] sm:text-base sm:tracking-[0.2em]"
             >
-              🎧 MY 9 BGM
+              🎧 My9GameMusic
             </button>
 
             <nav className="hidden gap-7 text-sm font-semibold md:flex">
@@ -2113,7 +2116,7 @@ export default function Home() {
                 href="/community"
                 className={`py-5 ${!loading && isViewingSharedSet ? "border-b-2 border-sky-500 text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
               >
-                みんなの9つのBGM
+                みんなの9つの音楽
               </a>
 
               <button
@@ -2121,7 +2124,7 @@ export default function Home() {
                 onClick={() => openAddForm()}
                 className="py-5 text-slate-500 hover:text-slate-900"
               >
-                BGMを追加
+                音楽を追加
               </button>
 
               <a
@@ -2158,7 +2161,7 @@ export default function Home() {
             href="/community"
             className={`min-w-0 px-1 py-3 text-center ${!loading && isViewingSharedSet ? "border-b-2 border-sky-500 text-slate-900" : "text-slate-500"}`}
           >
-            みんなのBGM
+            みんなの音楽
           </a>
 
           <button
@@ -2166,7 +2169,7 @@ export default function Home() {
             onClick={() => openAddForm()}
             className="min-w-0 px-1 py-3 text-center text-slate-500"
           >
-            BGMを追加
+            音楽を追加
           </button>
 
           <a
@@ -2187,7 +2190,7 @@ export default function Home() {
       {isAdmin && (
         <div className="border-b border-emerald-200 bg-emerald-50">
           <div className="mx-auto max-w-[1400px] px-6 py-2 text-center text-xs font-semibold text-emerald-700">
-            管理者モードでログイン中です。BGM編集・非表示・再表示・通報管理を利用できます。
+            管理者モードでログイン中です。音楽の編集・非表示・再表示・通報管理を利用できます。
           </div>
         </div>
       )}
@@ -2202,7 +2205,7 @@ export default function Home() {
 
               <p className="font-semibold text-slate-700">
                 {sharedSet.title ||
-                  "共有された9つのBGM"}
+                  "共有された9つの音楽"}
               </p>
             </div>
 
@@ -2220,18 +2223,18 @@ export default function Home() {
       <div className={`mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 sm:py-10 ${loading ? "hidden" : ""}`}>
         <div className="mb-7 sm:mb-9">
           <p className="mb-2 text-xs font-bold tracking-[0.25em] text-sky-500 sm:text-sm">
-            {isViewingSharedSet ? "MY 9 BY" : "MY 9 GAME BGM"}
+            {isViewingSharedSet ? "MY 9 BY" : "MY9 GAME MUSIC"}
           </p>
 
           <h1 className="text-2xl font-bold leading-tight sm:text-4xl">
             {isViewingSharedSet
               ? sharedSet.creator_name || "匿名"
-              : "私を彩る9つのBGM"}
+              : "私を彩る9つのゲーム音楽"}
           </h1>
 
           {isViewingSharedSet && (
             <p className="mt-3 text-sm text-slate-500 sm:text-base">
-              {sharedSet.title || "私を彩る9つのBGM"}
+              {sharedSet.title || "私を彩る9つのゲーム音楽"}
             </p>
           )}
         </div>
@@ -2247,10 +2250,10 @@ export default function Home() {
             {isViewingSharedSet && (
               <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
                 {generatedImage ? (
-                  <img src={generatedImage} alt="9つのBGM共有画像" className="aspect-square w-full rounded-2xl object-cover" />
+                  <img src={generatedImage} alt="9つの音楽共有画像" className="aspect-square w-full rounded-2xl object-cover" />
                 ) : (
                   <div className="flex aspect-square items-center justify-center rounded-2xl bg-slate-100 text-sm text-slate-500">
-                    9つのBGM画像を作成しています...
+                    9つの音楽画像を作成しています...
                   </div>
                 )}
               </div>
@@ -2266,7 +2269,7 @@ export default function Home() {
             <p className="mb-3 text-xs text-slate-500"></p>
             <input
               type="text"
-              placeholder="BGM名・ゲーム名・作曲者で検索..."
+              placeholder="音楽名・ゲーム名・作曲者で検索..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -2277,17 +2280,17 @@ export default function Home() {
 
             {loading ? (
               <div className="rounded-2xl bg-white p-10 text-center text-slate-500">
-                BGMを読み込んでいます...
+                音楽を読み込んでいます...
               </div>
          ) : filtered.length === 0 ? (
   <div className="rounded-2xl bg-white p-10 text-center">
     <p className="font-medium text-slate-700">
-      BGMが見つかりませんでした。
+      音楽が見つかりませんでした。
     </p>
     <p className="mt-2 text-sm text-slate-500">
       日本語、英語等表記を変えて検索するか、
       <br className="sm:hidden" />
-      未登録の場合は「新しいBGMを追加」から登録できます。
+      未登録の場合は「新しい音楽を追加」から登録できます。
     </p>
   </div>
 ) : (
@@ -2384,7 +2387,7 @@ export default function Home() {
                             }
                             className="mt-3 text-[11px] font-semibold text-slate-400 transition hover:text-amber-600 sm:text-xs"
                           >
-                            ⚠ このBGMを通報
+                            ⚠ この音楽を通報
                           </button>
 
                           {isAdmin && (
@@ -2432,7 +2435,7 @@ export default function Home() {
                               {bgm.is_hidden ? (
                                 <>
                                   <div className="mt-2 rounded-xl bg-slate-100 px-3 py-2 text-center text-xs font-bold text-slate-500">
-                                    🙈 現在このBGMは非表示です
+                                    🙈 現在この音楽は非表示です
                                   </div>
 
                                   <button
@@ -2440,7 +2443,7 @@ export default function Home() {
                                     onClick={() => restoreBgm(bgm)}
                                     className="mt-2 w-full rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
                                   >
-                                    👁 このBGMを再表示
+                                    👁 この音楽を再表示
                                   </button>
                                 </>
                               ) : (
@@ -2451,7 +2454,7 @@ export default function Home() {
                                   }
                                   className="mt-2 w-full rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
                                 >
-                                  🙈 このBGMを非表示
+                                  🙈 この音楽を非表示
                                 </button>
                               )}
                             </>
@@ -2483,7 +2486,7 @@ export default function Home() {
             {!isViewingSharedSet && (
               <div className="mt-8 rounded-2xl border border-sky-100 bg-sky-50 p-6">
                 <p className="font-bold">
-                  探しているBGMが見つかりませんか？
+                  探している音楽が見つかりませんか？
                 </p>
 
                 <button
@@ -2493,7 +2496,7 @@ export default function Home() {
                   }
                   className="mt-4 rounded-xl border border-sky-200 bg-white px-4 py-3 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-100 hover:shadow-md focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
-                  ＋ 新しいBGMを追加
+                  ＋ 新しい音楽を追加
                 </button>
               </div>
             )}
@@ -2505,7 +2508,7 @@ export default function Home() {
               <div className="sticky top-8 w-full min-w-0">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="min-w-0 text-sm font-bold tracking-[0.14em] sm:text-base sm:tracking-[0.18em]">
-                  SELECTED BGM ·{" "}
+                  SELECTED MUSIC ·{" "}
                   {selected.length} / 9
                 </h2>
 
@@ -2580,7 +2583,7 @@ export default function Home() {
                             </span>
 
                             <span className="ml-3 text-sm text-slate-400 sm:ml-5">
-                              BGMを選択
+                              音楽を選択
                             </span>
                           </div>
                         );
@@ -2688,7 +2691,7 @@ export default function Home() {
               <button type="button" onClick={() => setCommentingBgm(null)} className="text-2xl text-slate-400">×</button>
             </div>
             <p className="mt-4 text-sm font-semibold text-slate-700">{commentingBgm.title}</p>
-            <textarea value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} maxLength={200} rows={4} placeholder="このBGMへの思い出や感想を入力" className="mt-3 w-full resize-none rounded-2xl border border-slate-300 p-3 text-sm outline-none focus:border-sky-400" />
+            <textarea value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} maxLength={200} rows={4} placeholder="この音楽への思い出や感想を入力" className="mt-3 w-full resize-none rounded-2xl border border-slate-300 p-3 text-sm outline-none focus:border-sky-400" />
             <div className="mt-1 flex justify-between text-xs text-slate-400"><span>{commentError}</span><span>{commentDraft.length}/200</span></div>
             <button type="button" onClick={saveComment} className="mt-4 w-full rounded-2xl bg-sky-500 px-4 py-3 font-bold text-white">保存</button>
           </div>
@@ -2717,7 +2720,7 @@ export default function Home() {
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold">
-                  9つのBGMを公開
+                  9つの音楽を公開
                 </h2>
               </div>
 
@@ -2755,7 +2758,7 @@ export default function Home() {
                     )
                   }
                   maxLength={100}
-                  placeholder="例：私を彩る9つのBGM"
+                  placeholder="例：私を彩る9つのゲーム音楽"
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400"
                 />
 
@@ -2848,11 +2851,11 @@ export default function Home() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold tracking-[0.2em] text-sky-500">
-                  ADD BGM
+                  ADDMusic
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold">
-                  新しいBGMを追加
+                  新しい音楽を追加
                 </h2>
               </div>
 
@@ -3015,15 +3018,15 @@ export default function Home() {
               )}
 
               {newIgdbGameId !== null && <div className="mt-5 rounded-xl border p-4">
-                <h3 className="font-bold">このゲームに登録されているBGM</h3>
-                <p role="status" className="my-2 text-sm text-slate-500">{gameListStatus || (gameBgms.length ? "同じ曲があれば一覧から選択してください。曲名の表記も確認できます。" : "まだBGMがありません。下から登録できます。")}</p>
+                <h3 className="font-bold">このゲームに登録されている音楽</h3>
+                <p role="status" className="my-2 text-sm text-slate-500">{gameListStatus || (gameBgms.length ? "同じ曲があれば一覧から選択してください。曲名の表記も確認できます。" : "まだ音楽がありません。下から登録できます。")}</p>
                 <div className="max-h-48 space-y-2 overflow-y-auto">{registrationBgms.map(bgm => <button type="button" key={bgm.id} onClick={() => { addBgmToSelection(bgm); closeAddForm(); }} className="block w-full rounded-lg bg-slate-50 p-3 text-left hover:bg-sky-50">{bgm.title}<span className="ml-2 text-xs text-slate-400">{bgm.composer}</span></button>)}</div>
                 {!gameListReady && !gameListStatus.includes("読み込んで") && chosenGame && <button type="button" onClick={() => chooseGame({ ...chosenGame })}>再読み込み</button>}
               </div>}
               {newIgdbGameId !== null && gameListReady && <>
               <p className="my-4 text-sm text-slate-500">探している曲がなければ登録してください。別ゲームの同名曲は別々に登録できます。</p>
               <label className="mb-2 block text-sm font-semibold">
-                BGM名
+                音楽名
               </label>
 
               <input
@@ -3092,7 +3095,7 @@ export default function Home() {
                   : newIgdbGameId ===
                       null
                     ? "ゲームを選択してください"
-                    : "BGMを追加"}
+                    : "音楽を追加"}
               </button>
             </form>
           </div>
@@ -3126,7 +3129,7 @@ export default function Home() {
                   </h2>
 
                   <p className="mt-2 text-sm text-slate-500">
-                    BGM：
+                    音楽：
                     <span className="font-semibold text-slate-700">
                       {
                         editingBgm.title
@@ -3390,11 +3393,11 @@ export default function Home() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-bold tracking-[0.2em] text-amber-500">
-                  REPORT BGM
+                  REPORT MUSIC
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold">
-                  BGMを通報
+                  音楽を通報
                 </h2>
               </div>
 
@@ -3455,7 +3458,7 @@ export default function Home() {
                   <option value="">理由を選択してください</option>
                   <option value="duplicate">重複している</option>
                   <option value="not_exist">存在しない曲</option>
-                  <option value="wrong_title">BGM名が間違っている</option>
+                  <option value="wrong_title">音楽名が間違っている</option>
                   <option value="wrong_game">ゲームが間違っている</option>
                   <option value="inappropriate">不適切な内容</option>
                   <option value="other">その他</option>
@@ -3475,7 +3478,7 @@ export default function Home() {
                   }
                   maxLength={500}
                   rows={5}
-                  placeholder="例：同じゲーム・同じBGMが別名で登録されています。"
+                  placeholder="例：同じゲーム・同じ音楽が別名で登録されています。"
                   className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-amber-400"
                 />
 
@@ -3538,7 +3541,7 @@ export default function Home() {
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-500">
-                  未対応の通報を確認し、BGMの修正・非表示や対応状況の変更ができます。
+                  未対応の通報を確認し、音楽の修正・非表示や対応状況の変更ができます。
                 </p>
               </div>
 
@@ -3670,7 +3673,7 @@ export default function Home() {
                                   </>
                                 ) : (
                                   <p className="font-semibold text-red-500">
-                                    対象BGMが見つかりません (BGM ID: {report.bgm_id})
+                                    対象の音楽が見つかりません (音楽 ID: {report.bgm_id})
                                   </p>
                                 )}
                               </div>
@@ -3689,7 +3692,7 @@ export default function Home() {
                                     disabled={isUpdating}
                                     className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700 hover:bg-sky-100 disabled:opacity-50"
                                   >
-                                    🛠 BGM情報を確認・編集
+                                    🛠 音楽情報を確認・編集
                                   </button>
 
                                   {targetBgm.is_hidden ? (
@@ -3699,7 +3702,7 @@ export default function Home() {
                                       disabled={isUpdating}
                                       className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
                                     >
-                                      👁 BGMを再表示
+                                      👁 音楽を再表示
                                     </button>
                                   ) : (
                                     <button
@@ -3765,11 +3768,11 @@ export default function Home() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-bold tracking-[0.2em] text-red-500">
-                  HIDE BGM
+                  HIDE MUSIC
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold">
-                  このBGMを非表示にしますか？
+                  この音楽を非表示にしますか？
                 </h2>
               </div>
 
@@ -3807,7 +3810,7 @@ export default function Home() {
             </div>
 
             <div className="mt-5 rounded-xl bg-red-50 p-4 text-sm leading-6 text-red-600">
-              一般ユーザーのBGM検索一覧から非表示になります。
+              一般ユーザーの音楽検索一覧から非表示になります。
               データ自体は削除しないため、過去に公開されたMY 9では引き続き表示できます。
               管理者はいつでも再表示できます。
             </div>
@@ -3862,12 +3865,12 @@ export default function Home() {
               className="max-h-full w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-6"
             >
               <h2 className="mb-5 text-2xl font-bold">
-                9つのBGMが完成しました
+                9つの音楽が完成しました
               </h2>
 
               <img
                 src={generatedImage}
-                alt="私を彩る9つのBGM"
+                alt="私を彩る9つのゲーム音楽"
                 className="mx-auto w-full max-w-[650px] rounded-2xl shadow-lg"
               />
 

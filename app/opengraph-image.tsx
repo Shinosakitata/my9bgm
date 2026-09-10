@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "My 9 BGM - 好きなゲームBGMを9曲選んで共有";
+export const alt = "My9GameMusic - 好きなゲーム音楽を9曲選んで共有";
 export const size = {
   width: 1200,
   height: 630,
@@ -66,7 +66,7 @@ export default function Image() {
               letterSpacing: "-0.04em",
             }}
           >
-            My 9 BGM
+            My9GameMusic
           </div>
 
           <div
@@ -79,7 +79,7 @@ export default function Image() {
               color: "#e2e8f0",
             }}
           >
-            好きなゲームBGMを9曲選んで、
+            好きなゲーム音楽を9曲選んで、
             <br />
             あなただけのMY 9を共有しよう。
           </div>

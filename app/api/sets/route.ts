@@ -140,14 +140,14 @@ export async function POST(request: NextRequest) {
     )
   ) {
     return NextResponse.json(
-      { error: "BGM情報が正しくありません。" },
+      { error: "音楽情報が正しくありません。" },
       { status: 400 }
     );
   }
 
   if (new Set(normalizedIds).size !== 9) {
     return NextResponse.json(
-      { error: "同じBGMを複数選ぶことはできません。" },
+      { error: "同じ音楽を複数選ぶことはできません。" },
       { status: 400 }
     );
   }
@@ -162,21 +162,21 @@ export async function POST(request: NextRequest) {
     console.error("BGM確認エラー:", bgmCheckError);
 
     return NextResponse.json(
-      { error: "BGM情報の確認に失敗しました。" },
+      { error: "音楽情報の確認に失敗しました。" },
       { status: 500 }
     );
   }
 
   if (!existingBgms || existingBgms.length !== 9) {
     return NextResponse.json(
-      { error: "存在しないBGMが含まれています。" },
+      { error: "存在しない音楽が含まれています。" },
       { status: 400 }
     );
   }
 
   if (existingBgms.some((bgm) => bgm.is_hidden)) {
     return NextResponse.json(
-      { error: "現在公開できないBGMが含まれています。" },
+      { error: "現在公開できない音楽が含まれています。" },
       { status: 400 }
     );
   }
