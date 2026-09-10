@@ -2109,7 +2109,7 @@ export default function Home() {
                     : "text-slate-500 hover:text-slate-900"
                 }`}
               >
-                Editor
+                作成
               </button>
 
               <a
@@ -2154,7 +2154,7 @@ export default function Home() {
                 : "text-slate-500"
             }`}
           >
-            Editor
+            作成
           </button>
 
           <a

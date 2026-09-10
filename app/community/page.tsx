@@ -221,7 +221,7 @@ export default function CommunityPage() {
                 href="/"
                 className="py-5 text-slate-500 hover:text-slate-900"
               >
-                Editor
+                作成
               </Link>
 
               <span className="border-b-2 border-sky-500 py-5">
