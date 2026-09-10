@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 function fallbackImage(index: number) {
   const colors = ["0ea5e9", "6366f1", "a855f7", "f43f5e", "f59e0b", "22c55e", "14b8a6", "3b82f6", "ec4899"];
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420"><rect width="420" height="420" fill="#${colors[index % colors.length]}"/><text x="210" y="235" text-anchor="middle" fill="white" font-family="sans-serif" font-size="96" font-weight="700">${index + 1}</text></svg>`)}`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="420"><rect width="800" height="420" fill="#${colors[index % colors.length]}"/><circle cx="400" cy="210" r="78" fill="rgba(255,255,255,0.18)"/><text x="400" y="242" text-anchor="middle" fill="white" font-family="sans-serif" font-size="96" font-weight="700">♪</text></svg>`)}`;
 }
 
 async function imageSource(url: string | null, index: number) {
@@ -33,28 +33,24 @@ export default async function Image({ params }: { params: Promise<{ shareId: str
   );
 
   return new ImageResponse(
-    <div style={{ width: "100%", height: "100%", display: "flex", background: "#07111f", color: "white", fontFamily: "sans-serif" }}>
-      <div style={{ width: "630px", height: "630px", display: "flex", flexWrap: "wrap", flexShrink: 0 }}>
+    <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", overflow: "hidden", background: "#07111f", color: "white", fontFamily: "sans-serif" }}>
+      <div style={{ width: "1200px", height: "630px", display: "flex", flexWrap: "wrap" }}>
         {sources.map((src, index) => (
-          <div key={index} style={{ width: "210px", height: "210px", display: "flex", overflow: "hidden", position: "relative", border: "1px solid rgba(255,255,255,0.18)" }}>
+          <div key={index} style={{ width: "400px", height: "210px", display: "flex", overflow: "hidden", border: "1px solid rgba(255,255,255,0.2)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={src} alt="" width="210" height="210" style={{ width: "210px", height: "210px", objectFit: "cover" }} />
-            <div style={{ position: "absolute", left: "10px", top: "10px", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "rgba(2,6,23,0.72)", fontSize: "16px", fontWeight: 700 }}>
-              {index + 1}
-            </div>
+            <img src={src} alt="" width="400" height="210" style={{ width: "400px", height: "210px", objectFit: "cover" }} />
           </div>
         ))}
       </div>
-      <div style={{ minWidth: 0, flex: 1, padding: "64px 52px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", color: "#38bdf8", fontSize: "24px", fontWeight: 800, letterSpacing: "0.12em" }}>My9GameMusic</div>
-          <div style={{ display: "flex", marginTop: "28px", fontSize: "38px", lineHeight: 1.35, fontWeight: 900, overflowWrap: "anywhere" }}>
-            {sharedSetTitle(set)}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "92px", padding: "0 34px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(90deg, rgba(2,6,23,0.94), rgba(2,6,23,0.78))", borderTop: "1px solid rgba(255,255,255,0.26)" }}>
+        <div style={{ minWidth: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", fontSize: "34px", lineHeight: 1.1, fontWeight: 900, whiteSpace: "nowrap", overflow: "hidden" }}>
+            {set?.title?.trim() ? sharedSetTitle(set) : "私を彩る9つのゲーム音楽"}
           </div>
+          {set?.creator_name ? <div style={{ display: "flex", marginTop: "7px", color: "#dbeafe", fontSize: "17px" }}>作成者：{set.creator_name}</div> : null}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", color: "#cbd5e1", fontSize: "22px", lineHeight: 1.5 }}>
-          {set?.creator_name ? <div style={{ display: "flex" }}>作成者：{set.creator_name}</div> : null}
-          <div style={{ display: "flex", marginTop: "10px", color: "#64748b", fontSize: "18px" }}>my9bgm.vercel.app</div>
+        <div style={{ display: "flex", flexShrink: 0, marginLeft: "32px", color: "#7dd3fc", fontSize: "22px", fontWeight: 800, letterSpacing: "0.06em" }}>
+          My9GameMusic
         </div>
       </div>
     </div>,
