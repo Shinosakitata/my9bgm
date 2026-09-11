@@ -1,0 +1,4 @@
+bgm_id,game_title,current_title,proposed_title,confidence,source,reason
+"409","Monster Hunter 2","To One with Life","生命ある者へ","unresolved","https://www.capcom.co.jp/sound/","『生命ある者へ』はMonster Hunter Triの楽曲として確認できるが、この行はMonster Hunter 2に紐付いている。音源・game_idの誤りが疑われるためタイトルのみ更新しない。"
+"510","Monster Hunter Freedom Unite","The Roar of the Spark / Zinogre","閃烈なる蒼光／ジンオウガ","unresolved","https://www.capcom.co.jp/sound/","ジンオウガの初出はMonster Hunter Portable 3rdであり、Monster Hunter Freedom Uniteへの紐付けと整合しない。game_id修正が必要かを別途確認する。"
+"540","Kirby Star Allies","Void Termina Battle","組曲：星羅征く旅人","unresolved","https://www.kirby.jp/music/","Void Termina戦は複数楽章・フェーズで構成される。汎用英題だけでは『組曲：星羅征く旅人』全体または個別楽章のどれかを一意に確定できない。"

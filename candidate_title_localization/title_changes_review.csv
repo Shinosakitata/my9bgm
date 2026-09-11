@@ -1,0 +1,59 @@
+﻿bgm_id,game_title,current_title,proposed_title,confidence,source,reason
+51,Super Mario 64,"Dire, Dire Docks",ウォーターランド,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版サウンドトラックで知られる表記だが、今回の一次資料検索で原盤トラックリストを確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+52,Super Mario Galaxy,Gusty Garden Galaxy,ウィンドガーデン,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版サウンドトラック表記の可能性が高いが、任天堂の公開一次資料で対応を確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+53,Super Mario Galaxy,Egg Planet,エッグプラネット,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版サウンドトラック表記の可能性が高いが、任天堂の公開一次資料で対応を確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+215,Monster Hunter Tri,To One with Life,生命ある者へ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応は有力だが、同名曲が別作品にも登録されており、ゲーム紐付けを含めた確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+220,Monster Hunter Generations Ultimate,Proof of a Hero - MHXX Version,英雄の証 ～MHXXver.,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本語表記は有力だが、版名・記号を公式原盤どおり確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+225,Monster Hunter: World,Nay! The Honor is All Ours,さあ、意のままに／悉くを殲ぼすネルギガンテ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、収録版・モンスター名を公式トラックリストで再確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+229,The Legend of Zelda,Overworld Theme,地上BGM,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版で一般的な曲名だが、対象音源・収録版の一次資料確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+239,The Legend of Zelda: Majora's Mask,Clock Town,クロックタウン,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、対象が初日・二日目等の派生を含まないか確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+243,The Legend of Zelda: The Wind Waker,Great Sea,大海原,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、公式原盤トラックリストを今回確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+249,The Legend of Zelda: Skyward Sword,Ballad of the Goddess,女神の詩,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本語名は広く使われるが、検索で得た配信情報が第三者演奏版だったため高確度にしない。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+252,The Legend of Zelda: Breath of the Wild,Hyrule Castle,ハイラル城,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、対象音源の公式トラックリスト確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+256,The Legend of Zelda: Tears of the Kingdom,Colgera Battle,フリザゲイラ戦,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、公式日本版トラック表記を確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+265,Final Fantasy VII Remake,Airbuster,エアバスター,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版OST候補だが、通常版・REMAKE版の厳密なトラック対応確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+321,Dark Souls,Ornstein & Smough,竜狩りオーンスタインと処刑者スモウ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版OST候補だが、公式原盤表記の確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+336,Sekiro: Shadows Die Twice,Genichiro Ashina,葦名弦一郎,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版OST候補だが、公開された公式ページから個別トラック名まで確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+351,Fire Emblem Awakening,Don't Speak Her Name!,彼の者の名は,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版表記候補だが、同名のBRAVELY DEFAULT曲との誤同定を避けるため原盤確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+355,Fire Emblem Fates: Special Edition,Lost in Thoughts All Alone,if～ひとり思う～,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版主題歌に対応する可能性が高いが、言語・歌唱が異なる別音源の可能性がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+360,Fire Emblem: Three Houses,God-Shattering Star,この世界の頂で,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本語名は公式派生サウンドトラックで確認できるが、原作収録音源との同一性を追加確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+368,Monster Hunter Generations Ultimate,Silver-Winged Star / Valstrax,銀翼の凶星／バルファルク,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版表記候補だが、対象がMHXX版であることを一次資料で再確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+379,The Legend of Zelda,Dungeon Theme,地下BGM,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、ダンジョン種別・収録版の特定が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+380,Xenoblade Chronicles 3,Keves Battle,ケヴェス戦闘,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版OST表記候補だが、公式ページの検索結果で個別対応を確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+383,The Legend of Zelda: The Wind Waker,Molgera,モルド・ゲイラ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、公式原盤トラックリストを確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+385,The Legend of Zelda: Skyward Sword,Fi's Farewell,ファイとの別れ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、公式原盤トラックリストを確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+386,The Legend of Zelda: Breath of the Wild,Guardian Battle,ガーディアン戦,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、通常戦・探索時等の版を確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+387,Ōkami,Ryoshima Coast,両島原,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版OST表記候補だが、配信元を含む一次資料確認が不足している。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+388,The Legend of Zelda: Tears of the Kingdom,Demon King Ganondorf Battle,魔王ガノンドロフ戦,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、戦闘フェーズ別の曲を混同しないため確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+405,Octopath Traveler,Decisive Battle II,決戦2,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、OCTOPATH TRAVELER初代の公式日英対照を今回確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+409,Monster Hunter 2,To One with Life,生命ある者へ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,曲自体はMH3の日本語名として有力だが、現在のgame_titleがMonster Hunter 2であり紐付け不整合の可能性がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+414,Monster Hunter Freedom Unite,Pokke Village Theme,ポッケ村のテーマ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本語表記候補だが、対象サウンドトラックの公式公開トラックリスト確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+420,Monster Hunter 4,Golden Mane / Rajang,金色の鬣／ラージャン,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本語表記候補だが、記号と収録版の一次資料確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+435,Dragon Quest VIII: Journey of the Cursed King,Strange World,広い世界へ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、同作内の別フィールド曲との誤同定を避けるため確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+440,Dragon Quest XI: Echoes of an Elusive Age,Unwavering Courage,勇者は征く,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、公式日英対照を今回確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+445,Bravely Second: End Layer,Battle of Oblivion,忘れられた戦い,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版表記候補だが、公式ページで個別英題との対照を確定できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+451,Kirby's Adventure,Butter Building,バタービルディング,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、原作版・アレンジ版の確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+456,Kirby 64: The Crystal Shards,Ripple Star,リップルスター,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、ステージ曲か関連アレンジかの確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+463,Shin Megami Tensei III: Nocturne,Battle -Fierce Battle-,通常戦闘 ～アマラ経絡～,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、原作・HD REMASTER版の区別を確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+472,Kirby: Planet Robobot,Pink Ball Activate!,桃球発進！ロボボアーマー,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、英題との厳密な対応確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+477,Kirby Star Allies,The Star Conquering Traveler,組曲：星羅征く旅人,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、複数パートからなる組曲と単一トラックの対応確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+497,Fire Emblem: The Blazing Blade,Together We Ride,仲間入り,medium,公式サウンドトラック／メーカー情報の追加確認が必要,海外版名との対応候補だが、対象ゲーム版の公式日英対照確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+503,Fire Emblem: Radiant Dawn,Eternal Bond,絆永久に,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、公式原盤トラックリスト確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+505,Monster Hunter 2,Ancient Rhythm,古のリズム,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、英題との対応と収録作品を確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+510,Monster Hunter Freedom Unite,The Roar of the Spark / Zinogre,閃烈なる蒼光／ジンオウガ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本語曲名は有力だが、ジンオウガ初出作品と現在のgame_titleが整合しないため要確認。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+514,Monster Hunter 4,A Thousand Shining Blades / Dalamadur,千剣に巣食う者／ダラ・アマデュラ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、記号と公式原盤表記を確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+521,Animal Crossing,Title Theme,タイトル,medium,公式サウンドトラック／メーカー情報の追加確認が必要,どうぶつの森日本版曲名候補だが、シリーズ・時刻版を含む対象音源確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+524,Animal Crossing: New Leaf,7 PM,午後7時,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、晴天・雨天など音源差の確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+527,Animal Crossing: New Horizons,2 AM,午前2時,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、晴天・雨天など音源差の確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+530,Dragon Quest VIII: Journey of the Cursed King,War Cry,雄叫びをあげて,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、オリジナル版と交響組曲版の区別が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+531,Dragon Quest XI: Echoes of an Elusive Age,Hero's Challenge,勇者の挑戦,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、DQIII由来曲の収録版を確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+532,Bravely Second: End Layer,The Ones Who Gather Stars in the Night,夜に星を集う者達,medium,公式サウンドトラック／メーカー情報の追加確認が必要,BRAVELY SECONDの曲とBRAVELY DEFAULT IIの類似英題を混同するおそれがあり、公式原盤での対照確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+533,Mario Kart 64,Koopa Troopa Beach,ノコノコビーチ,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版コース名候補だが、公式サントラ上の曲名表記を確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+534,Mario Kart 8 Deluxe,Mount Wario,ワリオスノーマウンテン,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版コース名候補だが、公式サントラ上の曲名表記を確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+535,Kirby's Adventure,Nightmare Wizard,ナイトメアウィザード,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、公式原盤表記を確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+536,Kirby 64: The Crystal Shards,Miracle Matter,ミラクルマター,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、公式原盤表記を確認できなかった。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+537,Kirby's Return to Dream Land,Another Dimension,アナザーディメンション,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、ステージ・ボス版の区別が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+538,Kirby: Triple Deluxe,The World to Win,狂花水月,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、既存同名BGMとの重複・対象音源確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+539,Kirby: Planet Robobot,VS. Star Dream Soul OS,VS.スタードリーム.Soul OS,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版表記候補だが、句読点と版名を公式原盤どおり確認する必要がある。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+540,Kirby Star Allies,Void Termina Battle,組曲：星羅征く旅人,medium,公式サウンドトラック／メーカー情報の追加確認が必要,英題との対応候補だが、Void Termina各フェーズと組曲全体を混同しない確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
+545,Fire Emblem: The Sacred Stones,Determination,決意,medium,公式サウンドトラック／メーカー情報の追加確認が必要,日本版曲名候補だが、同作内の別曲との誤同定を避けるため公式原盤確認が必要。 タイトル変更時はnormalized_titleも同一トランザクションで同期し、BGM IDは変更しない。
