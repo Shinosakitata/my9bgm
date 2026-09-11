@@ -35,6 +35,10 @@ test("localhost: search, registration, duplicates, authenticated edits, legacy c
   assert.ok((await (await fetch(base + "/api/bgms?q=" + encodeURIComponent("久の"))).json()).bgms.some(bgm => bgm.id === 12), "Another Japanese title supports middle matching");
   assert.ok((await (await fetch(base + "/api/bgms?q=" + encodeURIComponent("cing M"))).json()).bgms.some(bgm => bgm.id === 11), "English titles support partial matching");
   assert.deepEqual((await (await fetch(base + "/api/bgms?q=" + encodeURIComponent("存在しない文字列"))).json()).bgms, []);
+  const emptyBug = await request("/api/reports", { report_type: "site_bug", message: "", page_url: base, user_agent: "Fixture Browser" });
+  assert.equal(emptyBug.status, 400);
+  const bug = await request("/api/reports", { report_type: "site_bug", category: "検索", message: "部分一致検索で結果が出ません。", page_url: base + "/?fixture=1", user_agent: "Fixture Browser" });
+  assert.equal(bug.status, 201, JSON.stringify(bug));
   for (const title of ["playsexwithme", "ＰＬＡＹ ＳＥＸ ＷＩＴＨ ＭＥ"]) assert.equal((await request("/api/bgms", { title, igdb_game_id: 100 })).status, 400);
   assert.equal((await fetch(base + "/api/games?q=unavailable")).status, 502);
   assert.equal((await fetch(base + "/api/games?q=" + "a".repeat(151))).status, 400);
@@ -81,6 +85,11 @@ test("localhost: search, registration, duplicates, authenticated edits, legacy c
   const named = await request("/api/sets", { title: "作成者検証", creator_name: "入力した作成者", bgm_ids: [1,2,3,4,5,6,7,8,9] });
   assert.equal(named.status, 201, JSON.stringify(named));
   const after = await (await fetch(db + "/fixture/state")).json();
+  const savedBug = after.bgm_reports.find(report => report.detail?.startsWith("[サイト不具合]"));
+  assert.ok(savedBug);
+  assert.match(savedBug.detail, /\[種類\]\n検索/);
+  assert.match(savedBug.detail, /\[URL\]\nhttp:\/\/127\.0\.0\.1:3001\/\?fixture=1/);
+  assert.match(savedBug.detail, /\[User Agent\]\nFixture Browser/);
   assert.deepEqual(after.bgms.filter(row => row.id <= 9), before.bgms.filter(row => row.id <= 9));
   assert.deepEqual(after.bgm_sets[0], before.bgm_sets[0]);
   assert.deepEqual(after.games, before.games, "Search must not write the dictionary");

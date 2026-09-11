@@ -10,6 +10,8 @@ const ALLOWED_REASONS = new Set([
   "inappropriate",
   "other",
 ]);
+const BUG_REPORT_CATEGORIES = new Set(["検索", "音楽の追加", "9曲の選択", "画像生成", "公開・共有", "表示崩れ", "曲名・ゲーム情報の誤り", "その他"]);
+const MAX_BUG_MESSAGE_LENGTH = 2000;
 
 function getServerSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -70,6 +72,30 @@ export async function POST(request: NextRequest) {
   }
 
   const payload = body as Record<string, unknown>;
+
+  if (payload.report_type === "site_bug") {
+    const category = typeof payload.category === "string" ? payload.category.trim() : "";
+    const message = typeof payload.message === "string" ? payload.message.trim() : "";
+    const pageUrl = typeof payload.page_url === "string" ? payload.page_url.trim() : "";
+    const userAgent = typeof payload.user_agent === "string" ? payload.user_agent.trim() : "";
+
+    if (category && !BUG_REPORT_CATEGORIES.has(category)) return NextResponse.json({ error: "不具合の種類が正しくありません。" }, { status: 400 });
+    if (!message) return NextResponse.json({ error: "不具合内容を入力してください。" }, { status: 400 });
+    if (message.length > MAX_BUG_MESSAGE_LENGTH) return NextResponse.json({ error: `不具合内容は${MAX_BUG_MESSAGE_LENGTH}文字以内で入力してください。` }, { status: 400 });
+    if (pageUrl.length > 2048 || !isHttpUrl(pageUrl)) return NextResponse.json({ error: "発生ページの情報が正しくありません。" }, { status: 400 });
+    if (userAgent.length > 512) return NextResponse.json({ error: "ブラウザ情報が長すぎます。" }, { status: 400 });
+
+    const { data: reportTarget, error: targetError } = await supabase.from("bgms").select("id").eq("is_hidden", false).order("id").limit(1).maybeSingle();
+    if (targetError || !reportTarget) return NextResponse.json({ error: "不具合報告を送信できませんでした。" }, { status: 500 });
+
+    const detail = ["[サイト不具合]", "", "[種類]", category || "未選択", "", "[内容]", message, "", "[URL]", pageUrl, "", "[User Agent]", userAgent || "取得できませんでした"].join("\n");
+    const { error } = await supabase.from("bgm_reports").insert({ bgm_id: reportTarget.id, reason: "other", detail, status: "pending" });
+    if (error) {
+      console.error("不具合報告保存エラー:", error);
+      return NextResponse.json({ error: "不具合報告を送信できませんでした。時間をおいてもう一度お試しください。" }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true }, { status: 201 });
+  }
 
   const bgmId =
     typeof payload.bgm_id === "number"
@@ -149,4 +175,13 @@ export async function POST(request: NextRequest) {
     { ok: true },
     { status: 201 }
   );
+}
+
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }

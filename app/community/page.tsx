@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import { BugReportButton } from "../components/BugReportButton";
 
 type Bgm = {
   id: number;
@@ -234,6 +235,8 @@ export default function CommunityPage() {
               >
                 音楽を追加
               </Link>
+
+              <BugReportButton className="py-5 text-slate-500 hover:text-slate-900" />
 
               <Link
                 href="/about"

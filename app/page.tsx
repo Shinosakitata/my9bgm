@@ -10,6 +10,7 @@ import { matchesBgmCatalog, normalizeBgmSearchText as normalizeBgmTitle } from "
 import { inappropriateText, similarTitle } from "../lib/textValidation";
 import { sharedSetUrl } from "../lib/site";
 import { SelectionDrop } from "./components/CatalogDrag";
+import { BugReportButton } from "./components/BugReportButton";
 
 import {
   DndContext,
@@ -2082,6 +2083,8 @@ export default function Home() {
                 音楽を追加
               </button>
 
+              <BugReportButton className="py-5 text-slate-500 hover:text-slate-900" />
+
               <a
                 href="/about"
                 className="py-5 text-slate-500 hover:text-slate-900"
@@ -2099,7 +2102,7 @@ export default function Home() {
           )}
         </div>
 
-        <nav className="grid w-full grid-cols-4 border-t border-slate-100 bg-white text-[11px] font-semibold md:hidden">
+        <nav className="grid w-full grid-cols-5 border-t border-slate-100 bg-white text-[11px] font-semibold md:hidden">
           <button
             type="button"
             onClick={returnToMyEditor}
@@ -2126,6 +2129,8 @@ export default function Home() {
           >
             音楽を追加
           </button>
+
+          <BugReportButton className="min-w-0 px-1 py-3 text-center text-slate-500" />
 
           <a
             href="/about"
@@ -3582,6 +3587,7 @@ export default function Home() {
                       const targetBgm = bgms.find(
                         (bgm) => bgm.id === report.bgm_id
                       );
+                      const isSiteBugReport = report.detail?.startsWith("[サイト不具合]") ?? false;
 
                       const isUpdating = updatingReportId === report.id;
 
@@ -3594,7 +3600,7 @@ export default function Home() {
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                                  {getReportReasonLabel(report.reason)}
+                                  {isSiteBugReport ? "サイト不具合" : getReportReasonLabel(report.reason)}
                                 </span>
 
                                 {report.status === "pending" ? (
@@ -3617,7 +3623,9 @@ export default function Home() {
                               </div>
 
                               <div className="mt-3">
-                                {targetBgm ? (
+                                {isSiteBugReport ? (
+                                  <p className="font-bold text-slate-900">サイト全体の不具合報告</p>
+                                ) : targetBgm ? (
                                   <>
                                     <p className="font-bold text-slate-900">
                                       {targetBgm.title}
@@ -3633,13 +3641,13 @@ export default function Home() {
                                 )}
                               </div>
 
-                              <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
+                              <div className="mt-3 whitespace-pre-wrap break-words rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
                                 {report.detail || "詳細コメントなし"}
                               </div>
                             </div>
 
                             <div className="flex min-w-[190px] flex-col gap-2">
-                              {targetBgm && (
+                              {targetBgm && !isSiteBugReport && (
                                 <>
                                   <button
                                     type="button"
