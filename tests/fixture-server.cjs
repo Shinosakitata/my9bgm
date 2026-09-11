@@ -45,6 +45,10 @@ const server = http.createServer(async (req, res) => {
   for (const [key, value] of url.searchParams) {
     if (value.startsWith("eq.")) rows = rows.filter(row => String(row[key]) === value.slice(3));
     if (value.startsWith("in.(")) { const ids = value.slice(4, -1).split(","); rows = rows.filter(row => ids.includes(String(row[key]))); }
+    if (value.startsWith("ilike.")) {
+      const pattern = value.slice(6).replace(/^%|%$/g, "").replace(/\\([\\%_])/g, "$1").toLocaleLowerCase();
+      rows = rows.filter(row => String(row[key] ?? "").toLocaleLowerCase().includes(pattern));
+    }
   }
   if (url.searchParams.has("or")) {
     const or = url.searchParams.get("or");

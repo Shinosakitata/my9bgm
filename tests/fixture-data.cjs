@@ -14,7 +14,12 @@ const games = [
 ];
 function seed() {
   return {
-    bgms: Array.from({ length: 9 }, (_, i) => ({ id: i + 1, title: `Fixture BGM ${i + 1}`, game_title: i === 0 ? "Monster Hunter: World" : `Legacy Game ${i + 1}`, composer: "Fixture Composer", rawg_game_id: 9000 + i, igdb_game_id: null, normalized_title: `fixturebgm${i + 1}`, image_url: i % 2 ? cover : rawgCover, is_hidden: false })),
+    bgms: [
+      ...Array.from({ length: 9 }, (_, i) => ({ id: i + 1, title: `Fixture BGM ${i + 1}`, game_title: i === 0 ? "Monster Hunter: World" : `Legacy Game ${i + 1}`, composer: "Fixture Composer", rawg_game_id: 9000 + i, igdb_game_id: null, normalized_title: `fixturebgm${i + 1}`, image_url: i % 2 ? cover : rawgCover, is_hidden: false })),
+      { id: 10, title: "生命ある者へ", game_title: "Monster Hunter Tri", composer: null, rawg_game_id: null, igdb_game_id: null, game_id: 217, normalized_title: "生命ある者へ", image_url: cover, is_hidden: false },
+      { id: 11, title: "Dancing Mad", game_title: "FINAL FANTASY VI", composer: "Nobuo Uematsu", rawg_game_id: null, igdb_game_id: 426, game_id: 3, normalized_title: "dancingmad", image_url: cover, is_hidden: false },
+      { id: 12, title: "悠久の風", game_title: "Final Fantasy III", composer: null, rawg_game_id: null, igdb_game_id: 77234, game_id: 99, normalized_title: "悠久の風", image_url: cover, is_hidden: false },
+    ],
     bgm_sets: [{ id: 1, share_id: "fixtureShare", title: "既存セット検証", bgm_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9], created_at: "2026-09-10T00:00:00Z" }],
     bgm_reports: [], games: [], game_aliases: [], game_external_ids: [],
   };

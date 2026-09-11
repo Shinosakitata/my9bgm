@@ -14,6 +14,18 @@ test("Japanese, spaced, compact, full-width inputs resolve to the same query", (
   assert.equal(canonicalSearchQuery("Final Fantasy VII"), "final fantasy vii");
 });
 
+test("BGM catalog search supports title substrings without breaking game and composer search", () => {
+  const { matchesBgmCatalog, matchesBgmTitle } = require("../lib/bgmSearch.ts");
+  const japanese = { title: "生命ある者へ", normalized_title: "生命ある者へ", game_title: "Monster Hunter Tri", composer: null };
+  for (const query of ["生命ある者へ", "生命", "ある", "者", "生命ある"]) assert.equal(matchesBgmTitle(japanese, query), true);
+  assert.equal(matchesBgmTitle({ title: "悠久の風", normalized_title: "悠久の風" }, "久の"), true);
+  assert.equal(matchesBgmTitle({ title: "Dancing Mad", normalized_title: "dancingmad" }, "cing M"), true);
+  assert.equal(matchesBgmCatalog(japanese, "Monster Hunter Tri"), true);
+  assert.equal(matchesBgmCatalog({ ...japanese, game_title: "Monster Hunter: World" }, "モンハンワールド"), true);
+  assert.equal(matchesBgmCatalog({ ...japanese, composer: "Nobuo Uematsu" }, "uematsu"), true);
+  assert.equal(matchesBgmCatalog(japanese, "存在しない文字列"), false);
+});
+
 test("paired Pokémon queries find both provider records before logical collapse", () => {
   const { matchesSearch } = require("../lib/gameSearch.ts");
   const games = [{ id: 1, name: "Pokémon Black Version 2" }, { id: 2, name: "Pokémon White Version 2" }, { id: 3, name: "Star Fox 2" }];

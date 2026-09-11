@@ -5,7 +5,8 @@ import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
-import { matchesSearch, type GameSearchResult } from "../lib/gameSearch";
+import { type GameSearchResult } from "../lib/gameSearch";
+import { matchesBgmCatalog, normalizeBgmSearchText as normalizeBgmTitle } from "../lib/bgmSearch";
 import { inappropriateText, similarTitle } from "../lib/textValidation";
 import { sharedSetUrl } from "../lib/site";
 import { SelectionDrop } from "./components/CatalogDrag";
@@ -78,18 +79,6 @@ const BGM_PAGE_SIZE = 30;
 
 const ADMIN_USER_ID =
   process.env.NEXT_PUBLIC_ADMIN_USER_ID;
-
-function normalizeBgmTitle(value: string) {
-  return value
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[\s　]/g, "")
-    .replace(
-      /[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~！？。、・「」『』【】（）［］｛｝〜ー]/g,
-      ""
-    )
-    .trim();
-}
 
 function SortableBgm({
   bgm,
@@ -800,8 +789,7 @@ export default function Home() {
   }
 
   const visibleGameBgms = bgms;
-  const filtered = visibleGameBgms.filter(bgm => (!bgm.is_hidden || isAdmin) &&
-    (!search.trim() || [bgm.title, bgm.game_title, bgm.composer ?? ""].some(value => matchesSearch(value, search))))
+  const filtered = visibleGameBgms.filter(bgm => (!bgm.is_hidden || isAdmin) && matchesBgmCatalog(bgm, search))
     .sort((a, b) => (popularity[b.id] ?? 0) - (popularity[a.id] ?? 0) || a.id - b.id);
   const registrationBgms = [...gameBgms].sort((a, b) => Number(similarTitle(b.title, newTitle)) - Number(similarTitle(a.title, newTitle)) || a.id - b.id);
 

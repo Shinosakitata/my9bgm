@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { enforceRateLimit } from "../../../lib/rateLimit";
 import { inappropriateText } from "../../../lib/textValidation";
 import { belongsToGame } from "../../../lib/bgmGame";
+import { matchesBgmTitle, normalizeBgmSearchText } from "../../../lib/bgmSearch";
 
 import { parseGameReference, verifyGame, findDuplicateBgm, gameColumns, normalizeBgmTitle, type VerifiedGame } from "../../../lib/bgmGame";
 
@@ -13,6 +14,31 @@ const MAX_COMPOSER_LENGTH = 100;
 export async function GET(request: NextRequest) {
   const supabase = getServerSupabase();
   if (!supabase) return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+  const searchQuery = request.nextUrl.searchParams.get("q")?.normalize("NFKC").trim() ?? "";
+  if (searchQuery) {
+    if (searchQuery.length > MAX_TITLE_LENGTH || containsControlCharacters(searchQuery)) {
+      return NextResponse.json({ error: "検索語が正しくありません。" }, { status: 400 });
+    }
+
+    const normalizedQuery = normalizeBgmSearchText(searchQuery);
+    if (!normalizedQuery) return NextResponse.json({ bgms: [] });
+
+    try {
+      const pattern = `%${escapeLikePattern(searchQuery)}%`;
+      const normalizedPattern = `%${escapeLikePattern(normalizedQuery)}%`;
+      const [titleResult, normalizedResult] = await Promise.all([
+        supabase.from("bgms").select("*").eq("is_hidden", false).ilike("title", pattern).order("id").limit(1000),
+        supabase.from("bgms").select("*").eq("is_hidden", false).ilike("normalized_title", normalizedPattern).order("id").limit(1000),
+      ]);
+      if (titleResult.error) throw titleResult.error;
+      if (normalizedResult.error) throw normalizedResult.error;
+      const rows = [...new Map([...(titleResult.data ?? []), ...(normalizedResult.data ?? [])].map(row => [row.id, row])).values()];
+      return NextResponse.json({ bgms: rows.filter(row => matchesBgmTitle(row, searchQuery)).sort((a, b) => a.id - b.id) });
+    } catch {
+      return NextResponse.json({ error: "音楽を検索できませんでした。もう一度お試しください。" }, { status: 502 });
+    }
+  }
+
   const id = Number(request.nextUrl.searchParams.get("igdb_game_id"));
   const gameIdParam = request.nextUrl.searchParams.get("game_id");
   const gameId = gameIdParam == null ? null : Number(gameIdParam);
@@ -43,6 +69,10 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "登録済みの音楽を取得できませんでした。もう一度お試しください。" }, { status: 502 });
   }
+}
+
+function escapeLikePattern(value: string) {
+  return value.replace(/[\\%_]/g, character => `\\${character}`);
 }
 
 

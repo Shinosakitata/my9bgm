@@ -27,6 +27,14 @@ test("localhost: search, registration, duplicates, authenticated edits, legacy c
   assert.deepEqual(honkai.results.map(g => g.id), [178282]);
   const legacyList = await (await fetch(base + "/api/bgms?igdb_game_id=100")).json();
   assert.deepEqual(legacyList.bgms.map(b => b.id), [1], "Game-specific list includes unchanged legacy records");
+  for (const q of ["生命ある者へ", "生命", "ある", "者", "生命ある"]) {
+    const response = await fetch(base + "/api/bgms?q=" + encodeURIComponent(q));
+    assert.equal(response.status, 200);
+    assert.ok((await response.json()).bgms.some(bgm => bgm.id === 10), `${q} finds 生命ある者へ`);
+  }
+  assert.ok((await (await fetch(base + "/api/bgms?q=" + encodeURIComponent("久の"))).json()).bgms.some(bgm => bgm.id === 12), "Another Japanese title supports middle matching");
+  assert.ok((await (await fetch(base + "/api/bgms?q=" + encodeURIComponent("cing M"))).json()).bgms.some(bgm => bgm.id === 11), "English titles support partial matching");
+  assert.deepEqual((await (await fetch(base + "/api/bgms?q=" + encodeURIComponent("存在しない文字列"))).json()).bgms, []);
   for (const title of ["playsexwithme", "ＰＬＡＹ ＳＥＸ ＷＩＴＨ ＭＥ"]) assert.equal((await request("/api/bgms", { title, igdb_game_id: 100 })).status, 400);
   assert.equal((await fetch(base + "/api/games?q=unavailable")).status, 502);
   assert.equal((await fetch(base + "/api/games?q=" + "a".repeat(151))).status, 400);
