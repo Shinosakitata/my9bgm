@@ -222,6 +222,9 @@ export default function Home() {
   const [publishedUrl, setPublishedUrl] =
     useState("");
 
+  const [publishedSelectionFingerprint, setPublishedSelectionFingerprint] =
+    useState("");
+
   const [copied, setCopied] =
     useState(false);
 
@@ -960,9 +963,19 @@ export default function Home() {
 
     setPublishTitle("");
     setPublishError("");
-    setPublishedUrl("");
+    if (publishedSelectionFingerprint !== getSelectionFingerprint()) {
+      setPublishedUrl("");
+    }
     setCopied(false);
     setShowPublishModal(true);
+  }
+
+  function getSelectionFingerprint() {
+    return JSON.stringify({
+      ids: selected.map((bgm) => bgm.id),
+      comments: selected.map((bgm) => comments[bgm.id] ?? ""),
+      creatorName: creatorName.trim(),
+    });
   }
 
   function closePublishModal() {
@@ -1033,6 +1046,7 @@ export default function Home() {
       const url = sharedSetUrl(result.share_id);
 
       setPublishedUrl(url);
+      setPublishedSelectionFingerprint(getSelectionFingerprint());
     } catch (error) {
       console.error(
         "公開エラー:",
@@ -1999,6 +2013,7 @@ export default function Home() {
       if (openModal) {
         setShowShareModal(true);
       }
+      return dataUrl;
     } catch (error) {
       console.error(
         "画像生成エラー:",
@@ -2008,6 +2023,7 @@ export default function Home() {
       alert(
         "画像の生成に失敗しました。"
       );
+      return null;
     } finally {
       setGeneratingImage(
         false
@@ -2022,8 +2038,8 @@ export default function Home() {
     }
   }, [isViewingSharedSet, selected]);
 
-  function downloadShareImage() {
-    if (!generatedImage) {
+  function downloadShareImage(imageUrl = generatedImage) {
+    if (!imageUrl) {
       return;
     }
 
@@ -2033,7 +2049,7 @@ export default function Home() {
       );
 
     link.href =
-      generatedImage;
+      imageUrl;
 
     link.download =
       "my9bgm.png";
@@ -2041,10 +2057,16 @@ export default function Home() {
     link.click();
   }
 
+  async function downloadPublishedImage() {
+    if (!publishedUrl || generatingImage) return;
+    const imageUrl = await generateShareImage(false);
+    if (imageUrl) downloadShareImage(imageUrl);
+  }
+
   return (
     <DndContext sensors={sensors} collisionDetection={args => args.active.data.current?.bgmId ? pointerWithin(args) : closestCenter({ ...args, droppableContainers: args.droppableContainers.filter(item => item.id !== "selection-drop") })} onDragEnd={handleDragEnd}>
     <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#f5f8fc] text-slate-900">
-      <header className="w-full border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex min-h-16 w-full max-w-[1400px] items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
           <div className="flex items-center gap-10">
             <button
@@ -2553,20 +2575,6 @@ export default function Home() {
                 </SortableContext>
               </SelectionDrop>
 
-              <button
-                type="button"
-                onClick={() => void generateShareImage()}
-                disabled={
-                  selected.length !== 9 ||
-                  generatingImage
-                }
-                className="mt-5 w-full max-w-full rounded-2xl bg-slate-900 px-3 py-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
-              >
-                {generatingImage
-                  ? "画像を作成しています..."
-                  : "画像を作成"}
-              </button>
-
               {!isViewingSharedSet && (
                 <button
                   type="button"
@@ -2576,9 +2584,11 @@ export default function Home() {
                   disabled={
                     selected.length !== 9
                   }
-                  className="mt-3 w-full max-w-full rounded-2xl bg-sky-500 px-3 py-4 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
+                  className="mt-5 w-full max-w-full rounded-2xl bg-sky-500 px-3 py-4 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
                 >
-                  🌐公開する
+                  {publishedUrl && publishedSelectionFingerprint === getSelectionFingerprint()
+                    ? "公開済みの共有を見る"
+                    : "この9曲を公開する"}
                 </button>
               )}
 
@@ -2772,7 +2782,21 @@ export default function Home() {
                   </button>
                 </div>
 
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button type="button" onClick={sharePublishedSetOnX} className="rounded-xl bg-black px-3 py-3 text-sm font-bold text-white hover:bg-slate-800">
+                    Xにポストする
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void downloadPublishedImage()}
+                    disabled={generatingImage}
+                    className="rounded-xl bg-slate-900 px-3 py-3 text-sm font-bold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {generatingImage ? "画像を作成しています..." : "画像を保存"}
+                  </button>
+                </div>
+
+                <div className="mt-2">
                   <a
                     href={publishedUrl}
                     target="_blank"
@@ -2781,9 +2805,6 @@ export default function Home() {
                   >
                     共有ページを開いて確認 →
                   </a>
-                  <button type="button" onClick={sharePublishedSetOnX} className="rounded-xl bg-black px-3 py-3 text-sm font-bold text-white hover:bg-slate-800">
-                    Xにシェア
-                  </button>
                 </div>
               </>
             )}
@@ -3839,9 +3860,7 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={
-                  downloadShareImage
-                }
+                onClick={() => downloadShareImage()}
                 className="mt-6 w-full rounded-2xl bg-slate-900 py-4 font-bold text-white"
               >
                 ↓ PNG画像を保存

@@ -207,9 +207,9 @@ export default function CommunityPage() {
 
   return (
     <main className="min-h-screen bg-[#f5f8fc] text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-16 max-w-[1400px] items-center justify-between px-6">
-          <div className="flex items-center gap-10">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex min-h-16 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-10">
             <Link
               href="/"
               className="whitespace-nowrap font-bold tracking-[0.2em]"
@@ -249,11 +249,19 @@ export default function CommunityPage() {
 
           <Link
             href="/"
-            className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700"
+            className="hidden rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700 sm:inline-flex"
           >
             ＋ 自分の9曲を作る
           </Link>
         </div>
+
+        <nav className="grid w-full grid-cols-5 border-t border-slate-100 bg-white text-[10px] font-semibold sm:text-[11px] md:hidden">
+          <Link href="/" className="min-w-0 px-1 py-3 text-center text-slate-500">作成</Link>
+          <span className="min-w-0 border-b-2 border-sky-500 px-1 py-3 text-center">コミュニティ</span>
+          <Link href="/?add=1" className="min-w-0 px-1 py-3 text-center text-slate-500">音楽を追加</Link>
+          <BugReportButton className="min-w-0 px-1 py-3 text-center text-slate-500" />
+          <Link href="/about" className="min-w-0 px-1 py-3 text-center text-slate-500">このサイト</Link>
+        </nav>
       </header>
 
       <div className="mx-auto max-w-[1400px] px-6 py-10">
