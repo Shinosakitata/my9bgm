@@ -1,0 +1,665 @@
+{
+  "audited_at": "2026-09-12T16:42:37.001Z",
+  "read_only": true,
+  "current_counts": {
+    "games": 266,
+    "game_external_ids": 262,
+    "game_aliases": 1125,
+    "bgms": 570,
+    "bgm_sets": 3
+  },
+  "baseline_counts": {
+    "games": 235,
+    "game_external_ids": 231,
+    "game_aliases": 1125,
+    "bgms": 570,
+    "bgm_sets": 3
+  },
+  "matched": {
+    "games": 31,
+    "game_external_ids": 31,
+    "game_alias_rows": 0,
+    "bgms": 0
+  },
+  "game_matches": [
+    {
+      "logical_game_name": "Cuphead",
+      "game_id": 305
+    },
+    {
+      "logical_game_name": "Disco Elysium",
+      "game_id": 306
+    },
+    {
+      "logical_game_name": "Final Fantasy IV",
+      "game_id": 307
+    },
+    {
+      "logical_game_name": "Final Fantasy IX",
+      "game_id": 308
+    },
+    {
+      "logical_game_name": "Final Fantasy V",
+      "game_id": 309
+    },
+    {
+      "logical_game_name": "Final Fantasy VII",
+      "game_id": 310
+    },
+    {
+      "logical_game_name": "Final Fantasy VIII",
+      "game_id": 311
+    },
+    {
+      "logical_game_name": "Final Fantasy X",
+      "game_id": 312
+    },
+    {
+      "logical_game_name": "Hades",
+      "game_id": 313
+    },
+    {
+      "logical_game_name": "Hollow Knight Silksong",
+      "game_id": 314
+    },
+    {
+      "logical_game_name": "Jet Set Radio",
+      "game_id": 315
+    },
+    {
+      "logical_game_name": "Jubeat",
+      "game_id": 316
+    },
+    {
+      "logical_game_name": "Live A Live",
+      "game_id": 317
+    },
+    {
+      "logical_game_name": "Maimai",
+      "game_id": 318
+    },
+    {
+      "logical_game_name": "Mass Effect",
+      "game_id": 319
+    },
+    {
+      "logical_game_name": "Mass Effect 2",
+      "game_id": 320
+    },
+    {
+      "logical_game_name": "Metal Gear Solid",
+      "game_id": 321
+    },
+    {
+      "logical_game_name": "Nights Into Dreams...",
+      "game_id": 322
+    },
+    {
+      "logical_game_name": "Resident Evil 2",
+      "game_id": 323
+    },
+    {
+      "logical_game_name": "Resident Evil 4",
+      "game_id": 324
+    },
+    {
+      "logical_game_name": "Romancing SaGa 3",
+      "game_id": 325
+    },
+    {
+      "logical_game_name": "Silent Hill 2",
+      "game_id": 326
+    },
+    {
+      "logical_game_name": "Silent Hill 3",
+      "game_id": 327
+    },
+    {
+      "logical_game_name": "Sonic CD",
+      "game_id": 328
+    },
+    {
+      "logical_game_name": "Sonic Unleashed",
+      "game_id": 329
+    },
+    {
+      "logical_game_name": "Street Fighter III: 3rd Strike",
+      "game_id": 330
+    },
+    {
+      "logical_game_name": "Tales of Symphonia",
+      "game_id": 331
+    },
+    {
+      "logical_game_name": "Tales of Vesperia",
+      "game_id": 332
+    },
+    {
+      "logical_game_name": "Tales of the Abyss",
+      "game_id": 333
+    },
+    {
+      "logical_game_name": "Tekken 5",
+      "game_id": 334
+    },
+    {
+      "logical_game_name": "The Elder Scrolls V: Skyrim",
+      "game_id": 335
+    }
+  ],
+  "external_matches": [
+    {
+      "logical_game_name": "Cuphead",
+      "external_id": 9061,
+      "game_id": 305,
+      "expected_game_id": 305
+    },
+    {
+      "logical_game_name": "Disco Elysium",
+      "external_id": 26472,
+      "game_id": 306,
+      "expected_game_id": 306
+    },
+    {
+      "logical_game_name": "Final Fantasy IV",
+      "external_id": 16587,
+      "game_id": 307,
+      "expected_game_id": 307
+    },
+    {
+      "logical_game_name": "Final Fantasy IX",
+      "external_id": 421,
+      "game_id": 308,
+      "expected_game_id": 308
+    },
+    {
+      "logical_game_name": "Final Fantasy V",
+      "external_id": 419,
+      "game_id": 309,
+      "expected_game_id": 309
+    },
+    {
+      "logical_game_name": "Final Fantasy VII",
+      "external_id": 393025,
+      "game_id": 310,
+      "expected_game_id": 310
+    },
+    {
+      "logical_game_name": "Final Fantasy VIII",
+      "external_id": 425,
+      "game_id": 311,
+      "expected_game_id": 311
+    },
+    {
+      "logical_game_name": "Final Fantasy X",
+      "external_id": 418,
+      "game_id": 312,
+      "expected_game_id": 312
+    },
+    {
+      "logical_game_name": "Hades",
+      "external_id": 113112,
+      "game_id": 313,
+      "expected_game_id": 313
+    },
+    {
+      "logical_game_name": "Hollow Knight Silksong",
+      "external_id": 115289,
+      "game_id": 314,
+      "expected_game_id": 314
+    },
+    {
+      "logical_game_name": "Jet Set Radio",
+      "external_id": 398453,
+      "game_id": 315,
+      "expected_game_id": 315
+    },
+    {
+      "logical_game_name": "Jubeat",
+      "external_id": 79960,
+      "game_id": 316,
+      "expected_game_id": 316
+    },
+    {
+      "logical_game_name": "Live A Live",
+      "external_id": 15835,
+      "game_id": 317,
+      "expected_game_id": 317
+    },
+    {
+      "logical_game_name": "Maimai",
+      "external_id": 60813,
+      "game_id": 318,
+      "expected_game_id": 318
+    },
+    {
+      "logical_game_name": "Mass Effect",
+      "external_id": 73,
+      "game_id": 319,
+      "expected_game_id": 319
+    },
+    {
+      "logical_game_name": "Mass Effect 2",
+      "external_id": 74,
+      "game_id": 320,
+      "expected_game_id": 320
+    },
+    {
+      "logical_game_name": "Metal Gear Solid",
+      "external_id": 375,
+      "game_id": 321,
+      "expected_game_id": 321
+    },
+    {
+      "logical_game_name": "Nights Into Dreams...",
+      "external_id": 5075,
+      "game_id": 322,
+      "expected_game_id": 322
+    },
+    {
+      "logical_game_name": "Resident Evil 2",
+      "external_id": 880,
+      "game_id": 323,
+      "expected_game_id": 323
+    },
+    {
+      "logical_game_name": "Resident Evil 4",
+      "external_id": 974,
+      "game_id": 324,
+      "expected_game_id": 324
+    },
+    {
+      "logical_game_name": "Romancing SaGa 3",
+      "external_id": 11313,
+      "game_id": 325,
+      "expected_game_id": 325
+    },
+    {
+      "logical_game_name": "Silent Hill 2",
+      "external_id": 481,
+      "game_id": 326,
+      "expected_game_id": 326
+    },
+    {
+      "logical_game_name": "Silent Hill 3",
+      "external_id": 482,
+      "game_id": 327,
+      "expected_game_id": 327
+    },
+    {
+      "logical_game_name": "Sonic CD",
+      "external_id": 5452,
+      "game_id": 328,
+      "expected_game_id": 328
+    },
+    {
+      "logical_game_name": "Sonic Unleashed",
+      "external_id": 5169,
+      "game_id": 329,
+      "expected_game_id": 329
+    },
+    {
+      "logical_game_name": "Street Fighter III: 3rd Strike",
+      "external_id": 6710,
+      "game_id": 330,
+      "expected_game_id": 330
+    },
+    {
+      "logical_game_name": "Tales of Symphonia",
+      "external_id": 1204,
+      "game_id": 331,
+      "expected_game_id": 331
+    },
+    {
+      "logical_game_name": "Tales of Vesperia",
+      "external_id": 1209,
+      "game_id": 332,
+      "expected_game_id": 332
+    },
+    {
+      "logical_game_name": "Tales of the Abyss",
+      "external_id": 1207,
+      "game_id": 333,
+      "expected_game_id": 333
+    },
+    {
+      "logical_game_name": "Tekken 5",
+      "external_id": 393526,
+      "game_id": 334,
+      "expected_game_id": 334
+    },
+    {
+      "logical_game_name": "The Elder Scrolls V: Skyrim",
+      "external_id": 472,
+      "game_id": 335,
+      "expected_game_id": 335
+    }
+  ],
+  "alias_duplicate_groups": [
+    {
+      "key": "Hades|hades",
+      "count": 2,
+      "aliases": [
+        "Hades",
+        "HADES"
+      ]
+    },
+    {
+      "key": "Hollow Knight Silksong|hollowknightsilksong",
+      "count": 2,
+      "aliases": [
+        "Hollow Knight Silksong",
+        "Hollow Knight: Silksong"
+      ]
+    },
+    {
+      "key": "Jubeat|jubeat",
+      "count": 2,
+      "aliases": [
+        "Jubeat",
+        "jubeat"
+      ]
+    },
+    {
+      "key": "Maimai|maimai",
+      "count": 2,
+      "aliases": [
+        "Maimai",
+        "maimai"
+      ]
+    },
+    {
+      "key": "Nights Into Dreams...|nightsintodreams",
+      "count": 2,
+      "aliases": [
+        "Nights Into Dreams...",
+        "NiGHTS into dreams..."
+      ]
+    },
+    {
+      "key": "Silent Hill 2|silenthill2",
+      "count": 2,
+      "aliases": [
+        "Silent Hill 2",
+        "SILENT HILL 2"
+      ]
+    },
+    {
+      "key": "Silent Hill 3|silenthill3",
+      "count": 2,
+      "aliases": [
+        "Silent Hill 3",
+        "SILENT HILL 3"
+      ]
+    },
+    {
+      "key": "Sonic Unleashed|ソニックワールドアドベンチャー",
+      "count": 2,
+      "aliases": [
+        "ソニック ワールドアドベンチャー",
+        "ソニックワールドアドベンチャー"
+      ]
+    }
+  ],
+  "alias_rows_present": [],
+  "bgm_matches": [
+    {
+      "logical_game": "Resident Evil 4",
+      "title": "Serenity",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy IV",
+      "title": "バトル2",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy V",
+      "title": "4つの心",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Hollow Knight Silksong",
+      "title": "Lace",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Maimai",
+      "title": "Garakuta Doll Play",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy VII",
+      "title": "エアリスのテーマ",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy VIII",
+      "title": "Liberi Fatali",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy IX",
+      "title": "Melodies Of Life～Final Fantasy",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Cuphead",
+      "title": "Die House",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Jubeat",
+      "title": "Evans",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy X",
+      "title": "Otherworld",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Silent Hill 2",
+      "title": "Theme of Laura",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "The Elder Scrolls V: Skyrim",
+      "title": "Dragonborn",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Street Fighter III: 3rd Strike",
+      "title": "Let's Get It On",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Sonic CD",
+      "title": "Sonic Boom",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Maimai",
+      "title": "Oshama Scramble!",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Sonic Unleashed",
+      "title": "Rooftop Run - Day",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Mass Effect 2",
+      "title": "Suicide Mission",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Hollow Knight Silksong",
+      "title": "Bellhart",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Hades",
+      "title": "Out of Tartarus",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Tekken 5",
+      "title": "SPARKING",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Live A Live",
+      "title": "MEGALOMANIA",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Cuphead",
+      "title": "Botanic Panic",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Romancing SaGa 3",
+      "title": "四魔貴族バトル1",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Metal Gear Solid",
+      "title": "The Best Is Yet To Come",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Silent Hill 2",
+      "title": "Promise",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Tales of the Abyss",
+      "title": "meaning of birth",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy IV",
+      "title": "愛のテーマ",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy V",
+      "title": "はるかなる故郷",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy VII",
+      "title": "J-E-N-O-V-A",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy VIII",
+      "title": "The Extreme",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Final Fantasy IX",
+      "title": "バトル1",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Resident Evil 2",
+      "title": "The Front Hall",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Silent Hill 3",
+      "title": "You're Not Here",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Disco Elysium",
+      "title": "Instrument of Surrender",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Mass Effect",
+      "title": "Uncharted Worlds",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Jet Set Radio",
+      "title": "Let Mom Sleep",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Disco Elysium",
+      "title": "Whirling-In-Rags, 8 AM",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Resident Evil 2",
+      "title": "The Second Malformation Of \"G\"",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Tales of Symphonia",
+      "title": "Fighting of the spirit",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Tales of Vesperia",
+      "title": "Fury Sparks",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Silent Hill 3",
+      "title": "End Of Small Sanctuary",
+      "present": false,
+      "bgm_id": null
+    },
+    {
+      "logical_game": "Nights Into Dreams...",
+      "title": "Dreams Dreams",
+      "present": false,
+      "bgm_id": null
+    }
+  ]
+}

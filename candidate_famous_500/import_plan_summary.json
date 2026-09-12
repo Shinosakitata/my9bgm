@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-09-12T16:46:19.681Z",
+  "read_only_review": true,
+  "production_writes": 0,
+  "current_database_counts": {
+    "bgms": 570,
+    "games": 266,
+    "game_aliases": 1125,
+    "game_external_ids": 262,
+    "bgm_sets": 3
+  },
+  "candidate_tracks": 43,
+  "importable_tracks": 43,
+  "held_tracks": 0,
+  "new_games": 0,
+  "aliases_to_insert": 84,
+  "external_ids_to_insert": 0,
+  "covers_available": 43,
+  "validation": {
+    "source_urls_unreachable": 0,
+    "duplicate_bgms": 0,
+    "logical_game_collisions": 0,
+    "alias_collisions": 0,
+    "external_id_collisions": 0,
+    "missing_covers": 0
+  },
+  "cover_policy": "Primary IGDB ID cover, t_cover_big HTTPS URL; existing games keep their existing cover",
+  "future_apply_command": "$env:CONFIRM_FAMOUS_FINAL_IMPORT=\"INSERT_ONLY_REMAINING_127\"; node --env-file=.env.local scripts/import-famous-final-plan.mjs --apply"
+}

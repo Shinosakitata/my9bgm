@@ -3010,6 +3010,11 @@ export default function Home() {
                 音楽名
               </label>
 
+              <div className="mb-3 rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm leading-relaxed text-slate-600">
+                <p className="font-semibold text-sky-700">正式な曲名が分からなくても大丈夫です。</p>
+                <p className="mt-1">「○○のテーマ」「オープニング」「エンドロール」など、分かる範囲の名前で追加できます。</p>
+              </div>
+
               <input
                 value={newTitle}
                 onChange={(e) =>
@@ -3018,7 +3023,7 @@ export default function Home() {
                   )
                 }
                 className="mb-5 w-full rounded-xl border border-slate-200 px-4 py-3"
-                placeholder="例：星に駆られて"
+                placeholder="曲名（例：英雄の証 / ○○のテーマ / エンドロール）"
                 maxLength={150}
               />
 

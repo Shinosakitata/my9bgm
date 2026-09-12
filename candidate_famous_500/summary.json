@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-09-12T16:00:04.374Z",
+  "input": 159,
+  "confirmed_duplicates": 0,
+  "import_ready_high": 43,
+  "still_needs_review": 116,
+  "import_ready_games": {
+    "distinct_logical_games": 31,
+    "existing_game_rows": 0,
+    "new_game_rows": 43
+  },
+  "sources": {
+    "apple_music_jp": 36,
+    "publisher_official": 7
+  },
+  "production_snapshot": {
+    "bgms": 570,
+    "games": 235,
+    "game_aliases": 1125,
+    "game_external_ids": 231,
+    "bgm_sets": 3
+  },
+  "database_writes": 0,
+  "rule": "Only exact official-distribution title matches with a resolved logical game enter import_ready; arrangements, remakes, ambiguous versions, and mismapped games remain unresolved."
+}
